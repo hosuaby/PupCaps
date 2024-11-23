@@ -1,17 +1,22 @@
+/* Styles for the whole video container. Use it for display settings. */
 #video {
     display: flex;
     flex-direction: column;
 }
 
+/* Styles for captions container. Use it to align captions in the video. */
 .captions {
     margin-top: 500px;
     text-align: center;
 }
 
+/* Styles for one "phrase", you can use it to define background for the whole caption. */
 .caption {
 }
 
+/* Styles for words. Define here fonts, colors, shadows and etc. */
 .word {
+    display: inline-block;
     font-family: Ubuntu;
     font-size: 60px;
     color: white;
@@ -20,13 +25,16 @@
     border-radius: 10px;
 }
 
+/* Styles for the word that is currently highlighted. */
 .word.highlighted {
     background-color: #670abd;
     text-shadow: none;
 }
 
+/* Styles for words before the highlighted one. */
 .word.before-highlighted {
 }
 
+/* Styles for words after the highlighted one. */
 .word.after-highlighted {
 }

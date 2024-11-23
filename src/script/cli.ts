@@ -40,7 +40,7 @@ function assertFileExtension(ext: string): (v: string) => void {
 const program = new Command();
 
 program
-    .name('PupCaps!')
+    .name('pupcaps')
     .description('Tool to add stylish captions to your video.')
     .version(packageJson.version)
     .argument('<file>', 'Path to the input SubRip Subtitle (.srt) file.', assertFileExtension('.srt'))
