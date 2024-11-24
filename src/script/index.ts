@@ -9,7 +9,7 @@ const captions = parseCaptions(cliArgs.srtInputFile);
 const progressBar = createProgressBar();
 
 const workDir = new WorkDir(captions, cliArgs);
-const renderer = new Renderer(cliArgs);
+const renderer = new Renderer(cliArgs, workDir);
 const recorder = new Recorder(captions, renderer, progressBar);
 
 (async () => {

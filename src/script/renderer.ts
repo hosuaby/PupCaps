@@ -1,38 +1,84 @@
 import {Args} from './cli';
-import GIFEncoder from 'gif-encoder';
-import {createWriteStream} from 'fs';
+import {PNG, PNGWithMetadata} from 'pngjs';
+import * as path from 'path';
+import {appendFileSync, writeFileSync} from 'fs';
+import {WorkDir} from './work-dir';
+import {Caption} from '../common/caption';
+import ffmpeg from 'fluent-ffmpeg';
+import {StatsPrinter} from './stats-printer';
 
 export class Renderer {
-    private readonly encoder: GIFEncoder;
+    private readonly framesFileName: string;
+    private readonly emptyFrameFileName: string;
 
-    constructor(private readonly args : Args) {
-        this.encoder = new GIFEncoder(args.videoWidth, args.videoHeight);
-
-        this.encoder.setRepeat(-1);                             // 0 = loop forever, -1 = no repeat
-        this.encoder.setQuality(this.args.renderingQuality);    // Quality: lower is better, 10 is default
-        this.encoder.setDispose(2);
-        this.encoder.setTransparent(0x0000000);
-        this.encoder.writeHeader();
+    constructor(private readonly args : Args,
+                private readonly workDir: WorkDir) {
+        this.framesFileName = path.join(workDir.screenShotsDir, 'frames.txt');
+        this.emptyFrameFileName = path.join(workDir.screenShotsDir, 'empty.png');
     }
 
     public startEncoding() {
-        const stream = createWriteStream(this.args.gifOutputFile);
-        this.encoder.pipe(stream);
+        const empty = new PNG({
+            width: this.args.videoWidth,
+            height: this.args.videoHeight,
+            colorType: 6,
+        });
+        writeFileSync(this.emptyFrameFileName, PNG.sync.write(empty));
     }
 
     public addEmptyFrame(durationMs?: number) {
-        this.addFrame([], durationMs);
-    }
+        let frameDef = `file '${this.emptyFrameFileName}'\n`;
 
-    public addFrame(buffer: Buffer<ArrayBufferLike> | never[], durationMs?: number) {
         if (durationMs) {
-            this.encoder.setDelay(durationMs);
+            const durationSec = durationMs / 1000;
+            frameDef += `duration ${durationSec}\n`;
         }
 
-        this.encoder.addFrame(buffer);
+        appendFileSync(this.framesFileName, frameDef, 'utf8');
     }
 
-    public finishEncoding() {
-        this.encoder.finish();
+    public addFrame(caption: Caption, png: PNGWithMetadata) {
+        const screenShotFileName = path.join(this.workDir.screenShotsDir, `screenshot_${caption.index}.png`);
+        writeFileSync(screenShotFileName, PNG.sync.write(png));
+
+        const durationSec = (caption.endTimeMs - caption.startTimeMs) / 1000;
+
+        appendFileSync(
+            this.framesFileName,
+            `file '${screenShotFileName}'\nduration ${durationSec}\n`,
+            'utf8');
+    }
+
+    public async render() {
+        console.log(`Encoding ${this.args.movOutputFile}...\n`);
+        const statsPrinter = new StatsPrinter();
+
+        await new Promise((resolve, reject) => {
+            ffmpeg()
+                .input(this.framesFileName)
+                .inputOptions([
+                    '-f concat',    // concat frames from the frame list
+                    '-safe 0'       // to prevent errors related to unsafe filenames
+                ])
+                .outputOptions([
+                    '-c:v prores_ks',           // codec for Films Apple QuickTime (MOV)
+                    '-profile:v 4444',          // enable the best quality
+                    '-pix_fmt yuva444p10le',    // lossless setting
+                    '-q:v 0',                   // lossless setting
+                    '-vendor ap10'              // ensures the output MOV file is compatible with Apple QuickTime
+                ])
+                .output(this.args.movOutputFile)
+                .on('progress', (progress: Object) => {
+                    statsPrinter.print(progress);
+                })
+                .on('end', () => {
+                    console.log(`${this.args.movOutputFile} encoded`);
+                    resolve(this.args.movOutputFile);
+                })
+                .on('error', (err: any) => {
+                    reject(err);
+                })
+                .run();
+        });
     }
 }

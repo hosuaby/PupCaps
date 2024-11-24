@@ -1,6 +1,6 @@
 import * as tmp from 'tmp';
 import * as path from 'path';
-import {writeFileSync, symlinkSync, rmSync} from 'fs';
+import {writeFileSync, symlinkSync, rmSync, mkdirSync} from 'fs';
 import {Caption} from '../common/caption';
 import {Args} from './cli';
 import {indexHtml, indexJs} from './assets';
@@ -22,11 +22,17 @@ export class WorkDir {
         this.setupCaptions();
         this.setupVideoSizeCss();
 
+        mkdirSync(this.screenShotsDir);
+
         return index;
     }
 
     public clear() {
         rmSync(this.workDir.name, { recursive: true, force: true });
+    }
+
+    public get screenShotsDir(): string {
+        return path.join(this.workDir.name, 'screenshots');
     }
 
     private setupVideoSizeCss() {

@@ -37,6 +37,6 @@ export default [{
     ],
     external: [
         'fs', 'path', 'os', 'stream', 'util',   // Node.js built-in modules
-        'commander', 'tmp', 'gif-encoder', 'pngjs', 'puppeteer', 'cli-progress'
+        'commander', 'tmp', 'fluent-ffmpeg', 'pngjs', 'puppeteer', 'cli-progress'
     ],
 }];

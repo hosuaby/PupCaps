@@ -1,6 +1,6 @@
 import * as puppeteer from 'puppeteer';
 import * as cliProgress from 'cli-progress';
-import {PNG} from 'pngjs';
+import {PNG, PNGWithMetadata} from 'pngjs';
 import {Caption} from '../common/caption';
 import {Renderer} from './renderer';
 
@@ -31,8 +31,7 @@ export class Recorder {
                 await this.nextStep();
 
                 const screenShot = await this.takeScreenShot(videoElem!);
-                const frameDuration = caption.endTimeMs - caption.startTimeMs;
-                this.renderer.addFrame(screenShot, frameDuration);
+                this.renderer.addFrame(caption, screenShot);
 
                 // Add delay before the next frame
                 if (i < this.captions.length - 1) {
@@ -48,11 +47,11 @@ export class Recorder {
             // Finish with en empty frame
             this.renderer.addEmptyFrame();
 
-            this.renderer.finishEncoding();
+            this.progressBar.stop();
+            await this.renderer.render();
         } catch (error) {
             console.error('Error during Puppeteer operation:', error);
         } finally {
-            this.progressBar.stop();
             await this.browser?.close();
         }
     }
@@ -80,12 +79,11 @@ export class Recorder {
         });
     }
 
-    private async takeScreenShot(elem: puppeteer.ElementHandle): Promise<Buffer<ArrayBufferLike>> {
+    private async takeScreenShot(elem: puppeteer.ElementHandle): Promise<PNGWithMetadata> {
         const screenshotBuffer = await elem.screenshot({
             encoding: 'binary',
             omitBackground: true,
         });
-        const png = PNG.sync.read(Buffer.from(screenshotBuffer));
-        return png.data;
+        return PNG.sync.read(Buffer.from(screenshotBuffer));
     }
 }

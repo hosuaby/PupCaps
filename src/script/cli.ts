@@ -5,11 +5,10 @@ import * as cliProgress from 'cli-progress';
 
 export interface Args {
     srtInputFile: string;
-    gifOutputFile: string;
+    movOutputFile: string;
     videoWidth: number;
     videoHeight: number;
     styleFile: string;
-    renderingQuality: number;
 }
 
 function parseIntAndAssert(...assertions: ((v: number) => void)[]): (v: string) => number {
@@ -24,14 +23,6 @@ function assertPositive(option: string): (v: number) => void {
     return (value: number) => {
         if (value < 0) {
             throw new Error(`${option} should be positive!`);
-        }
-    };
-}
-
-function assertMinMax(option: string, min: number, max: number): (v: number) => void {
-    return (value: number) => {
-        if (value < min || value > max) {
-            throw new Error(`${option} must be a number between ${min} and ${max}.`);
         }
     };
 }
@@ -53,8 +44,9 @@ program
     .version(packageJson.version)
     .argument('<file>', 'Path to the input SubRip Subtitle (.srt) file.', assertFileExtension('.srt'))
     .option('-o, --output <file>',
-        `Full or relative path where the created animated GIF file should be written.
-        By default, it will be saved in the same directory as the input subtitle file.`)
+        `Full or relative path where the created Films Apple QuickTime (MOV) file should be written.
+        By default, it will be saved in the same directory as the input subtitle file.`,
+        assertFileExtension('.mov'))
     .option('-w, --width <number>',
         'Width of the video in pixels (default: 1080).',
         parseIntAndAssert(assertPositive('Width')),
@@ -67,14 +59,10 @@ program
         `Full or relative path to the styles .css file.
         If not provided, default styles for captions will be used.`,
         assertFileExtension('.css'))
-    .option('-q, --quality <number>',
-        'Quality of rendering. A number between 1 and 20 (default: 10). Lower numbers indicate better quality.',
-        parseIntAndAssert(assertPositive('Quality'), assertMinMax('Quality', 1, 20)),
-        10)
     .action((inputFile, options: any) => {
         if (!options.output) {
             const fileBasename = (inputFile as any as string).slice(0, -4);
-            options.output = `${fileBasename}.gif`;
+            options.output = `${fileBasename}.mov`;
         }
 
         if (!options.style) {
@@ -88,11 +76,10 @@ export function parseArgs(): Args {
 
     return {
         srtInputFile: program.args[0],
-        gifOutputFile: opts.output,
+        movOutputFile: opts.output,
         videoWidth: opts.width,
         videoHeight: opts.height,
         styleFile: opts.style,
-        renderingQuality: opts.quality,
     };
 }
 
@@ -102,11 +89,10 @@ export function printArgs(args: Args) {
         : args.styleFile;
 
     const srt = `
-    Output:     ${args.gifOutputFile}
+    Output:     ${args.movOutputFile}
     Width:      ${args.videoWidth} px
     Height:     ${args.videoHeight} px
     Styles:     ${styles}
-    Quality:    ${args.renderingQuality} (of 20; lower is better)
     `;
 
     console.log(srt);

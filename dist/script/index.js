@@ -7,7 +7,7 @@ var fs = require('fs');
 var tmp = require('tmp');
 var puppeteer = require('puppeteer');
 var pngjs = require('pngjs');
-var GIFEncoder = require('gif-encoder');
+var ffmpeg = require('fluent-ffmpeg');
 
 function _interopNamespaceDefault(e) {
 	var n = Object.create(null);
@@ -119,7 +119,7 @@ var keywords = [
 var dependencies = {
 	"cli-progress": "^3.12.0",
 	commander: "^12.1.0",
-	"gif-encoder": "^0.7.2",
+	"fluent-ffmpeg": "^2.1.3",
 	pngjs: "^7.0.0",
 	puppeteer: "^23.9.0",
 	tmp: "^0.2.3"
@@ -130,7 +130,7 @@ var devDependencies = {
 	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-node-resolve": "^15.3.0",
 	"@types/cli-progress": "^3.11.6",
-	"@types/gif-encoder": "^0.7.4",
+	"@types/fluent-ffmpeg": "^2.1.27",
 	"@types/node": "^22.9.1",
 	"@types/pngjs": "^6.0.5",
 	"@types/tmp": "^0.2.6",
@@ -177,13 +177,6 @@ function assertPositive(option) {
         }
     };
 }
-function assertMinMax(option, min, max) {
-    return (value) => {
-        if (value < min || value > max) {
-            throw new Error(`${option} must be a number between ${min} and ${max}.`);
-        }
-    };
-}
 function assertFileExtension(ext) {
     return (value) => {
         if (!value.endsWith(ext)) {
@@ -198,17 +191,16 @@ program
     .description('Tool to add stylish captions to your video.')
     .version(packageJson.version)
     .argument('<file>', 'Path to the input SubRip Subtitle (.srt) file.', assertFileExtension('.srt'))
-    .option('-o, --output <file>', `Full or relative path where the created animated GIF file should be written.
-        By default, it will be saved in the same directory as the input subtitle file.`)
+    .option('-o, --output <file>', `Full or relative path where the created Films Apple QuickTime (MOV) file should be written.
+        By default, it will be saved in the same directory as the input subtitle file.`, assertFileExtension('.mov'))
     .option('-w, --width <number>', 'Width of the video in pixels (default: 1080).', parseIntAndAssert(assertPositive('Width')), 1080)
     .option('-h, --height <number>', 'Height of the video in pixels (default: 1920).', parseIntAndAssert(assertPositive('Height')), 1920)
     .option('-s, --style <file>', `Full or relative path to the styles .css file.
         If not provided, default styles for captions will be used.`, assertFileExtension('.css'))
-    .option('-q, --quality <number>', 'Quality of rendering. A number between 1 and 20 (default: 10). Lower numbers indicate better quality.', parseIntAndAssert(assertPositive('Quality'), assertMinMax('Quality', 1, 20)), 10)
     .action((inputFile, options) => {
     if (!options.output) {
         const fileBasename = inputFile.slice(0, -4);
-        options.output = `${fileBasename}.gif`;
+        options.output = `${fileBasename}.mov`;
     }
     if (!options.style) {
         options.style = defaultStylesCss;
@@ -219,11 +211,10 @@ function parseArgs() {
     const opts = program.opts();
     return {
         srtInputFile: program.args[0],
-        gifOutputFile: opts.output,
+        movOutputFile: opts.output,
         videoWidth: opts.width,
         videoHeight: opts.height,
         styleFile: opts.style,
-        renderingQuality: opts.quality,
     };
 }
 function printArgs(args) {
@@ -231,11 +222,10 @@ function printArgs(args) {
         ? '(Default)'
         : args.styleFile;
     const srt = `
-    Output:     ${args.gifOutputFile}
+    Output:     ${args.movOutputFile}
     Width:      ${args.videoWidth} px
     Height:     ${args.videoHeight} px
     Styles:     ${styles}
-    Quality:    ${args.renderingQuality} (of 20; lower is better)
     `;
     console.log(srt);
 }
@@ -322,10 +312,14 @@ class WorkDir {
         fs.symlinkSync(this.args.styleFile, path__namespace.join(this.workDir.name, 'captions.css'));
         this.setupCaptions();
         this.setupVideoSizeCss();
+        fs.mkdirSync(this.screenShotsDir);
         return index;
     }
     clear() {
         fs.rmSync(this.workDir.name, { recursive: true, force: true });
+    }
+    get screenShotsDir() {
+        return path__namespace.join(this.workDir.name, 'screenshots');
     }
     setupVideoSizeCss() {
         const css = `#video {
@@ -365,8 +359,7 @@ class Recorder {
                 const caption = this.captions[i];
                 await this.nextStep();
                 const screenShot = await this.takeScreenShot(videoElem);
-                const frameDuration = caption.endTimeMs - caption.startTimeMs;
-                this.renderer.addFrame(screenShot, frameDuration);
+                this.renderer.addFrame(caption, screenShot);
                 // Add delay before the next frame
                 if (i < this.captions.length - 1) {
                     const idleDelay = this.captions[i + 1].startTimeMs - caption.endTimeMs;
@@ -378,13 +371,13 @@ class Recorder {
             }
             // Finish with en empty frame
             this.renderer.addEmptyFrame();
-            this.renderer.finishEncoding();
+            this.progressBar.stop();
+            await this.renderer.render();
         }
         catch (error) {
             console.error('Error during Puppeteer operation:', error);
         }
         finally {
-            this.progressBar.stop();
             await this.browser?.close();
         }
     }
@@ -413,38 +406,89 @@ class Recorder {
             encoding: 'binary',
             omitBackground: true,
         });
-        const png = pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
-        return png.data;
+        return pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
+    }
+}
+
+class StatsPrinter {
+    statsPrinted = false;
+    print(stats) {
+        const lines = Object
+            .entries(stats)
+            .map(([key, value]) => `${key}: ${value}`);
+        if (this.statsPrinted) {
+            process.stdout.write(`\x1b[${lines.length}A`); // Move up N lines
+        }
+        lines.forEach((line) => {
+            process.stdout.write(`\r${line.padEnd(40)}\n`); // Ensure the line is fully overwritten
+        });
+        this.statsPrinted = true;
     }
 }
 
 class Renderer {
     args;
-    encoder;
-    constructor(args) {
+    workDir;
+    framesFileName;
+    emptyFrameFileName;
+    constructor(args, workDir) {
         this.args = args;
-        this.encoder = new GIFEncoder(args.videoWidth, args.videoHeight);
-        this.encoder.setRepeat(-1); // 0 = loop forever, -1 = no repeat
-        this.encoder.setQuality(this.args.renderingQuality); // Quality: lower is better, 10 is default
-        this.encoder.setDispose(2);
-        this.encoder.setTransparent(0x0000000);
-        this.encoder.writeHeader();
+        this.workDir = workDir;
+        this.framesFileName = path__namespace.join(workDir.screenShotsDir, 'frames.txt');
+        this.emptyFrameFileName = path__namespace.join(workDir.screenShotsDir, 'empty.png');
     }
     startEncoding() {
-        const stream = fs.createWriteStream(this.args.gifOutputFile);
-        this.encoder.pipe(stream);
+        const empty = new pngjs.PNG({
+            width: this.args.videoWidth,
+            height: this.args.videoHeight,
+            colorType: 6,
+        });
+        fs.writeFileSync(this.emptyFrameFileName, pngjs.PNG.sync.write(empty));
     }
     addEmptyFrame(durationMs) {
-        this.addFrame([], durationMs);
-    }
-    addFrame(buffer, durationMs) {
+        let frameDef = `file '${this.emptyFrameFileName}'\n`;
         if (durationMs) {
-            this.encoder.setDelay(durationMs);
+            const durationSec = durationMs / 1000;
+            frameDef += `duration ${durationSec}\n`;
         }
-        this.encoder.addFrame(buffer);
+        fs.appendFileSync(this.framesFileName, frameDef, 'utf8');
     }
-    finishEncoding() {
-        this.encoder.finish();
+    addFrame(caption, png) {
+        const screenShotFileName = path__namespace.join(this.workDir.screenShotsDir, `screenshot_${caption.index}.png`);
+        fs.writeFileSync(screenShotFileName, pngjs.PNG.sync.write(png));
+        const durationSec = (caption.endTimeMs - caption.startTimeMs) / 1000;
+        fs.appendFileSync(this.framesFileName, `file '${screenShotFileName}'\nduration ${durationSec}\n`, 'utf8');
+    }
+    async render() {
+        console.log(`Encoding ${this.args.movOutputFile}...\n`);
+        const statsPrinter = new StatsPrinter();
+        await new Promise((resolve, reject) => {
+            ffmpeg()
+                .input(this.framesFileName)
+                .inputOptions([
+                '-f concat', // concat frames from the frame list
+                '-safe 0' // to prevent errors related to unsafe filenames
+            ])
+                .outputOptions([
+                '-c:v prores_ks', // codec for Films Apple QuickTime (MOV)
+                '-profile:v 4444', // enable the best quality
+                '-pix_fmt yuva444p10le', // lossless setting
+                '-q:v 0', // lossless setting
+                '-vendor ap10' // ensures the output MOV file is compatible with Apple QuickTime
+            ])
+                .output(this.args.movOutputFile)
+                .on('progress', (progress) => {
+                statsPrinter.print(progress);
+            })
+                .on('end', () => {
+                console.log(`${this.args.movOutputFile} encoded`);
+                resolve(this.args.movOutputFile);
+            })
+                .on('error', (err) => {
+                reject(err);
+            })
+                .run();
+        });
     }
 }
 
@@ -452,7 +496,7 @@ const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
 const progressBar = createProgressBar();
 const workDir = new WorkDir(captions, cliArgs);
-const renderer = new Renderer(cliArgs);
+const renderer = new Renderer(cliArgs, workDir);
 const recorder = new Recorder(captions, renderer, progressBar);
 (async () => {
     try {
