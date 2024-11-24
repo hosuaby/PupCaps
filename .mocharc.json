@@ -1,0 +1,8 @@
+{
+  "require": ["tsx"],
+  "extension": ["ts"],
+  "spec": "test/**/*.test.ts",
+  "env": {
+    "TS_NODE_PROJECT": "./test/tsconfig.test.json"
+  }
+}

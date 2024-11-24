@@ -12,7 +12,7 @@ export default [{
     },
     plugins: [
         typescript({
-            tsconfig: './tsconfig.web.json',
+            tsconfig: './src/web/tsconfig.json',
         }),
         resolve({
             extensions: ['.ts'],
@@ -32,7 +32,7 @@ export default [{
         json(),
         commonjs(),
         typescript({
-            tsconfig: './tsconfig.script.json',
+            tsconfig: './src/script/tsconfig.json',
         }),
     ],
     external: [

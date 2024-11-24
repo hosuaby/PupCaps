@@ -43,16 +43,30 @@ function readCaptions(srtContent: string): Caption[] {
     return captions;
 }
 
-function readWords(text: string): Word[] {
+export function readWords(text: string): Word[] {
     const words = text.split(/\s+/);
-    return words
-        .map(word => {
-            const match = word.match(highlightedWordPattern);
-            return {
-                rawWord: match ? match[1] : word,
-                isHighlighted: !!match,
-            }
+    const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
+
+    const res: Word[] = [];
+
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const match = word.match(highlightedWordPattern);
+        const rawWord = match ? match[1] : word;
+
+        const isHighlighted = Boolean(match);
+        const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
+        const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
+
+        res.push({
+            rawWord,
+            isHighlighted,
+            isBeforeHighlighted,
+            isAfterHighlighted,
         });
+    }
+
+    return res;
 }
 
 function toMillis(timecodes: string): number {

@@ -129,17 +129,23 @@ var devDependencies = {
 	"@rollup/plugin-commonjs": "^28.0.1",
 	"@rollup/plugin-json": "^6.1.0",
 	"@rollup/plugin-node-resolve": "^15.3.0",
+	"@types/chai": "^5.0.1",
 	"@types/cli-progress": "^3.11.6",
 	"@types/fluent-ffmpeg": "^2.1.27",
+	"@types/mocha": "^10.0.10",
 	"@types/node": "^22.9.1",
 	"@types/pngjs": "^6.0.5",
 	"@types/tmp": "^0.2.6",
+	chai: "^5.1.2",
+	mocha: "^10.8.2",
 	rollup: "^4.27.3",
 	"rollup-plugin-typescript2": "^0.36.0",
+	tsx: "^4.19.2",
 	typescript: "^5.7.2"
 };
 var scripts = {
-	build: "rollup -c"
+	build: "rollup -c",
+	test: "mocha"
 };
 var packageJson = {
 	name: name,
@@ -204,6 +210,9 @@ program
     }
     if (!options.style) {
         options.style = defaultStylesCss;
+    }
+    else {
+        options.style = path__namespace.resolve(options.style);
     }
 });
 function parseArgs() {
@@ -276,14 +285,23 @@ function readCaptions(srtContent) {
 }
 function readWords(text) {
     const words = text.split(/\s+/);
-    return words
-        .map(word => {
+    const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
+    const res = [];
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
         const match = word.match(highlightedWordPattern);
-        return {
-            rawWord: match ? match[1] : word,
-            isHighlighted: !!match,
-        };
-    });
+        const rawWord = match ? match[1] : word;
+        const isHighlighted = Boolean(match);
+        const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
+        const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
+        res.push({
+            rawWord,
+            isHighlighted,
+            isBeforeHighlighted,
+            isAfterHighlighted,
+        });
+    }
+    return res;
 }
 function toMillis(timecodes) {
     const parts = timecodes.split(/[:.]/).map(Number);

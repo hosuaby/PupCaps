@@ -2,6 +2,7 @@ import {Command} from '@commander-js/extra-typings';
 import packageJson from '../../package.json';
 import {defaultStylesCss} from './assets';
 import * as cliProgress from 'cli-progress';
+import * as path from 'path';
 
 export interface Args {
     srtInputFile: string;
@@ -67,6 +68,8 @@ program
 
         if (!options.style) {
             options.style = defaultStylesCss;
+        } else {
+            options.style = path.resolve(options.style);
         }
     });
 
