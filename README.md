@@ -1,5 +1,3 @@
-# PupCaps!
-
 <p align="center">
     <img src="./docs/logo.png"/>
 </p>
@@ -26,7 +24,7 @@ From npm:
 npm i -g pupcaps@latest
 ```
 
-of from sources:
+or from sources:
 
 ```shell
 git clone git@github.com:hosuaby/PupCaps.git
