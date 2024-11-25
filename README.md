@@ -10,6 +10,8 @@ Design your captions using CSS, allowing complete control over fonts, colors, po
 ###### Limitations
 CSS3 animations are not currently supported.
 
+You will probably also be interested in [Transcriptionist](https://github.com/hosuaby/Transcriptionist), a tool that uses AI to extract captions from video files.
+
 <p align="center">
     <img src="./docs/caption.png"/>
 </p>
@@ -38,7 +40,7 @@ npm i -g .
 ## Usage
 
 To use the script, you need a **SubRip Subtitle (.srt)** file. PupCaps enables you to create **Karaoke-style captioning** 
-(also known as "word-by-word highlighting").
+(also known as "word-by-word highlighting"). You can use Transcriptionist to extract `.srt` from the original video file.
 
 To achieve this effect, wrap the words you want to highlight in square brackets. For example:
 
