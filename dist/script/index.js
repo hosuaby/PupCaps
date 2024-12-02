@@ -284,7 +284,7 @@ function readCaptions(srtContent) {
     return captions;
 }
 function readWords(text) {
-    const words = text.split(/\s+/);
+    const words = splitText(text);
     const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
     const res = [];
     for (let i = 0; i < words.length; i++) {
@@ -302,6 +302,38 @@ function readWords(text) {
         });
     }
     return res;
+}
+function splitText(text) {
+    const words = [];
+    let currentWord = '';
+    let isCurrentHighlighted = false;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const isWhitespace = /^\s$/.test(char);
+        if (!isWhitespace) {
+            currentWord += char;
+            if (char === '[') {
+                isCurrentHighlighted = true;
+            }
+            else if (char === ']') {
+                isCurrentHighlighted = false;
+            }
+        }
+        else {
+            // char is a whitespace
+            if (isCurrentHighlighted) {
+                currentWord += char;
+            }
+            else if (currentWord) {
+                words.push(currentWord);
+                currentWord = '';
+            }
+        }
+    }
+    if (currentWord) {
+        words.push(currentWord);
+    }
+    return words;
 }
 function toMillis(timecodes) {
     const parts = timecodes.split(/[:.]/).map(Number);

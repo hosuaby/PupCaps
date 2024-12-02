@@ -44,7 +44,7 @@ function readCaptions(srtContent: string): Caption[] {
 }
 
 export function readWords(text: string): Word[] {
-    const words = text.split(/\s+/);
+    const words = splitText(text);
     const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
 
     const res: Word[] = [];
@@ -67,6 +67,41 @@ export function readWords(text: string): Word[] {
     }
 
     return res;
+}
+
+function splitText(text: string): string[] {
+    const words: string[] = [];
+
+    let currentWord = '';
+    let isCurrentHighlighted = false;
+
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const isWhitespace = /^\s$/.test(char);
+
+        if (!isWhitespace) {
+            currentWord += char;
+            if (char === '[') {
+                isCurrentHighlighted = true;
+            } else if (char === ']') {
+                isCurrentHighlighted = false;
+            }
+        } else {
+            // char is a whitespace
+            if (isCurrentHighlighted) {
+                currentWord += char;
+            } else if (currentWord) {
+                words.push(currentWord);
+                currentWord = '';
+            }
+        }
+    }
+
+    if (currentWord) {
+        words.push(currentWord);
+    }
+
+    return words;
 }
 
 function toMillis(timecodes: string): number {

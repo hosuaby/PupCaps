@@ -94,4 +94,29 @@ describe('readCaptions', () => {
             }
         ]);
     });
+
+    it('when many highlighted together', () => {
+        const words = readWords('La [vie est] belle!');
+        expect(words).to.have.lengthOf(3);
+        expect(words).to.deep.equal([
+            {
+                rawWord: 'La',
+                isHighlighted: false,
+                isBeforeHighlighted: true,
+                isAfterHighlighted: false,
+            },
+            {
+                rawWord: 'vie est',
+                isHighlighted: true,
+                isBeforeHighlighted: false,
+                isAfterHighlighted: false,
+            },
+            {
+                rawWord: 'belle!',
+                isHighlighted: false,
+                isBeforeHighlighted: false,
+                isAfterHighlighted: true,
+            }
+        ]);
+    });
 });
