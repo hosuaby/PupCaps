@@ -121,6 +121,7 @@ pupcaps path/to/subtitles.srt --style path/to/custom/styles.css
 | -w, --width  | 1080    | Width of the video in pixels.                                                                                                                                              |
 | -h, --height | 1920    | Height of the video in pixels.                                                                                                                                             |
 | -s, --style  |         | Full or relative path to the styles .css file. If not provided, default styles for captions will be used.                                                                  |
+| --preview    |         | Prevents the script from generating a video file. Instead, captions are displayed in the browser for debugging and preview purposes.                                       |
 
 ## Caption Video
 

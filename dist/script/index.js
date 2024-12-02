@@ -8,6 +8,7 @@ var tmp = require('tmp');
 var puppeteer = require('puppeteer');
 var pngjs = require('pngjs');
 var ffmpeg = require('fluent-ffmpeg');
+var httpServer = require('http-server');
 
 function _interopNamespaceDefault(e) {
 	var n = Object.create(null);
@@ -120,9 +121,13 @@ var dependencies = {
 	"cli-progress": "^3.12.0",
 	commander: "^12.1.0",
 	"fluent-ffmpeg": "^2.1.3",
+	"get-port": "^7.1.0",
+	"http-server": "^14.1.1",
+	open: "^10.1.0",
 	pngjs: "^7.0.0",
 	puppeteer: "^23.9.0",
-	tmp: "^0.2.3"
+	tmp: "^0.2.3",
+	vue: "^3.5.13"
 };
 var devDependencies = {
 	"@commander-js/extra-typings": "^12.1.0",
@@ -132,6 +137,7 @@ var devDependencies = {
 	"@types/chai": "^5.0.1",
 	"@types/cli-progress": "^3.11.6",
 	"@types/fluent-ffmpeg": "^2.1.27",
+	"@types/http-server": "^0.12.4",
 	"@types/mocha": "^10.0.10",
 	"@types/node": "^22.9.1",
 	"@types/pngjs": "^6.0.5",
@@ -140,6 +146,7 @@ var devDependencies = {
 	mocha: "^10.8.2",
 	rollup: "^4.27.3",
 	"rollup-plugin-typescript2": "^0.36.0",
+	"rollup-plugin-vue": "^6.0.0",
 	tsx: "^4.19.2",
 	typescript: "^5.7.2"
 };
@@ -203,6 +210,8 @@ program
     .option('-h, --height <number>', 'Height of the video in pixels (default: 1920).', parseIntAndAssert(assertPositive('Height')), 1920)
     .option('-s, --style <file>', `Full or relative path to the styles .css file.
         If not provided, default styles for captions will be used.`, assertFileExtension('.css'))
+    .option('--preview', `Prevents the script from generating a video file. 
+        Instead, captions are displayed in the browser for debugging and preview purposes.`)
     .action((inputFile, options) => {
     if (!options.output) {
         const fileBasename = inputFile.slice(0, -4);
@@ -224,6 +233,7 @@ function parseArgs() {
         videoWidth: opts.width,
         videoHeight: opts.height,
         styleFile: opts.style,
+        isPreview: opts.preview,
     };
 }
 function printArgs(args) {
@@ -370,6 +380,9 @@ class WorkDir {
     }
     get screenShotsDir() {
         return path__namespace.join(this.workDir.name, 'screenshots');
+    }
+    get rootDir() {
+        return this.workDir.name;
     }
     setupVideoSizeCss() {
         const css = `#video {
@@ -542,17 +555,63 @@ class Renderer {
     }
 }
 
+class PreviewServer {
+    wordDir;
+    constructor(wordDir) {
+        this.wordDir = wordDir;
+    }
+    async start() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const server = httpServer.createServer({ root: this.wordDir.rootDir });
+                const port = await PreviewServer.getFreePort();
+                server.listen(port, async () => {
+                    try {
+                        const childProcess = await PreviewServer.openUrl(`http://127.0.0.1:${port}`);
+                        childProcess.on('close', () => {
+                            server.close(() => {
+                                resolve();
+                            });
+                        });
+                    }
+                    catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+    static async getFreePort() {
+        const { default: getPort } = await import('get-port');
+        return getPort();
+    }
+    static async openUrl(url) {
+        const { default: open } = await import('open');
+        return open(url, { wait: true });
+    }
+}
+
 const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
 const progressBar = createProgressBar();
 const workDir = new WorkDir(captions, cliArgs);
 const renderer = new Renderer(cliArgs, workDir);
 const recorder = new Recorder(captions, renderer, progressBar);
+const previewServer = new PreviewServer(workDir);
 (async () => {
     try {
         const indexHtml = workDir.setup();
         printArgs(cliArgs);
-        await recorder.recordCaptionsVideo(indexHtml);
+        if (!cliArgs.isPreview) {
+            await recorder.recordCaptionsVideo(indexHtml);
+        }
+        else {
+            console.log('Launching preview server...');
+            await previewServer.start();
+        }
         console.log('Done!');
     }
     catch (err) {

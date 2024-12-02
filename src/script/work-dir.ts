@@ -35,6 +35,10 @@ export class WorkDir {
         return path.join(this.workDir.name, 'screenshots');
     }
 
+    public get rootDir(): string {
+        return this.workDir.name;
+    }
+
     private setupVideoSizeCss() {
         const css= `#video {
             width: ${this.args.videoWidth}px;

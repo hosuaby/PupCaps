@@ -1,17 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html data-theme="light" lang="en">
 <head>
     <title>PupCaps! - Page for Puppeteer</title>
 
-    <link rel="stylesheet" href="captions.css" />
-    <link rel="stylesheet" href="video.size.css" />
+    <!-- Vendors -->
+    <script src="https://unpkg.com/vue@3.3.4/dist/vue.global.prod.js"></script>
 
-    <script type="module" src="captions.js">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" />
+
+    <style>
+        body {
+            background: none !important;
+        }
+    </style>
+
+    <link rel="stylesheet" href="./captions.css" />
+    <link rel="stylesheet" href="./video.size.css" />
+
+    <script type="module" src="./captions.js">
     </script>
-    <script type="module" src="index.js">
+    <script type="module" src="./index.js">
     </script>
 </head>
 <body>
+<!-- Controllers for preview -->
+<section id="player-controller" class="section is-small">
+    <player></player>
+</section>
+
 <div id="video">
     <div class="captions">
     </div>

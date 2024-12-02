@@ -10,6 +10,7 @@ export interface Args {
     videoWidth: number;
     videoHeight: number;
     styleFile: string;
+    isPreview: boolean;
 }
 
 function parseIntAndAssert(...assertions: ((v: number) => void)[]): (v: string) => number {
@@ -60,6 +61,9 @@ program
         `Full or relative path to the styles .css file.
         If not provided, default styles for captions will be used.`,
         assertFileExtension('.css'))
+    .option('--preview',
+        `Prevents the script from generating a video file. 
+        Instead, captions are displayed in the browser for debugging and preview purposes.`)
     .action((inputFile, options: any) => {
         if (!options.output) {
             const fileBasename = (inputFile as any as string).slice(0, -4);
@@ -83,6 +87,7 @@ export function parseArgs(): Args {
         videoWidth: opts.width,
         videoHeight: opts.height,
         styleFile: opts.style,
+        isPreview: opts.preview,
     };
 }
 
