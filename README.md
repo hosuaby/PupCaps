@@ -5,10 +5,8 @@
 [![npm](https://img.shields.io/npm/v/pupcaps.svg)](http://npm.im/pupcaps) 
 
 **PupCaps!** is a Node.js script that makes it easy to add captions to your videos with fully customizable styles. 
-Design your captions using CSS, allowing complete control over fonts, colors, positioning, and more.
-
-###### Limitations
-CSS3 animations are not currently supported.
+Design your captions using CSS, allowing complete control over fonts, colors, positioning, and more. 
+CSS3 animations are supported.
 
 You will probably also be interested in [Transcriptionist](https://github.com/hosuaby/Transcriptionist), a tool that uses AI to extract captions from video files.
 
@@ -103,6 +101,39 @@ Once you've customized your `.css` file, provide it to the PupCaps script using 
 pupcaps path/to/subtitles.srt --style path/to/custom/styles.css
 ```
 
+#### CSS3 animations
+
+CSS3 provides virtually limitless possibilities for styling captions, including advanced animations. 
+For instance, you can create a karaoke-style effect where the background color of a highlighted word gradually changes:
+
+```css
+@keyframes shrinkPadding {
+    from {
+        padding: 30px;
+        background-color: #ff92eb;
+    }
+    to {
+        padding: 12px;
+        background-color: #670abd;
+    }
+}
+
+.word.highlighted {
+    text-shadow: none;
+    animation: shrinkPadding 0.333s ease-in-out;
+}
+```
+
+To ensure that CSS3 animations are rendered in the output video, use the `--animate` option.
+
+> [!WARNING]  
+> Enabling the `--animate` option forces the script to record captions in real-time, meaning the recording process will 
+> run for the entire duration of the original video. Use this option only if your captions rely on CSS3 animations.
+
+```shell
+pupcaps path/to/subtitles.srt --style path/to/custom/styles.css --animate
+```
+
 ### Options
 
 **Usage:** `pupcaps [options] <file>`
@@ -115,13 +146,15 @@ pupcaps path/to/subtitles.srt --style path/to/custom/styles.css
 
 ###### Options
 
-| Option       | Default | Description                                                                                                                                                                |
-|--------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| -o, --output |         | Full or relative path where the created Films Apple QuickTime (MOV) file should be written. By default, it will be saved in the same directory as the input subtitle file. |
-| -w, --width  | 1080    | Width of the video in pixels.                                                                                                                                              |
-| -h, --height | 1920    | Height of the video in pixels.                                                                                                                                             |
-| -s, --style  |         | Full or relative path to the styles .css file. If not provided, default styles for captions will be used.                                                                  |
-| --preview    |         | Prevents the script from generating a video file. Instead, captions are displayed in the browser for debugging and preview purposes.                                       |
+| Option        | Default | Description                                                                                                                                                                |
+|---------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -o, --output  |         | Full or relative path where the created Films Apple QuickTime (MOV) file should be written. By default, it will be saved in the same directory as the input subtitle file. |
+| -w, --width   | 1080    | Width of the video in pixels.                                                                                                                                              |
+| -h, --height  | 1920    | Height of the video in pixels.                                                                                                                                             |
+| -s, --style   |         | Full or relative path to the styles .css file. If not provided, default styles for captions will be used.                                                                  |
+| -r, --fps     | 30      | Specifies the frame rate (FPS) of the output video. Valid values are between 1 and 60.                                                                                     |
+| -a, --animate |         | Records captions with CSS3 animations. Note: The recording will run for the entire duration of the video. Use this option only if your captions involve CSS3 animations.   |
+| --preview     |         | Prevents the script from generating a video file. Instead, captions are displayed in the browser for debugging and preview purposes.                                       |
 
 ## Caption Video
 

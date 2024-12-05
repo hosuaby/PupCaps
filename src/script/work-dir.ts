@@ -4,6 +4,7 @@ import {writeFileSync, symlinkSync, rmSync, mkdirSync} from 'fs';
 import {Caption} from '../common/caption';
 import {Args} from './cli';
 import {indexHtml, indexJs} from './assets';
+import {PlayerArgs} from '../common/player-args';
 
 export class WorkDir {
     private readonly workDir = tmp.dirSync({ template: 'pupcaps-XXXXXX' });
@@ -20,6 +21,7 @@ export class WorkDir {
         symlinkSync(this.args.styleFile, path.join(this.workDir.name, 'captions.css'));
 
         this.setupCaptions();
+        this.setupPlayerArgs();
         this.setupVideoSizeCss();
 
         mkdirSync(this.screenShotsDir);
@@ -54,5 +56,15 @@ export class WorkDir {
         const captionsJsFile = path.join(this.workDir.name, 'captions.js');
 
         writeFileSync(captionsJsFile, captionsJs);
+    }
+
+    private setupPlayerArgs() {
+        const playerArgs: PlayerArgs = {
+            isPreview: this.args.isPreview,
+        };
+        const argsJs = 'window.playerArgs = ' + JSON.stringify(playerArgs, null, 2);
+        const argsJsFile = path.join(this.workDir.name, 'player.args.js');
+
+        writeFileSync(argsJsFile, argsJs);
     }
 }

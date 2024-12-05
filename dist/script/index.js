@@ -5,10 +5,11 @@ var path = require('path');
 var cliProgress = require('cli-progress');
 var fs = require('fs');
 var tmp = require('tmp');
-var puppeteer = require('puppeteer');
 var pngjs = require('pngjs');
 var ffmpeg = require('fluent-ffmpeg');
 var httpServer = require('http-server');
+var puppeteer = require('puppeteer');
+var stream = require('stream');
 
 function _interopNamespaceDefault(e) {
 	var n = Object.create(null);
@@ -190,6 +191,13 @@ function assertPositive(option) {
         }
     };
 }
+function assertMinMax(option, min, max) {
+    return (value) => {
+        if (value < min || value > max) {
+            throw new Error(`${option} should be between ${min} and ${max}!`);
+        }
+    };
+}
 function assertFileExtension(ext) {
     return (value) => {
         if (!value.endsWith(ext)) {
@@ -204,14 +212,18 @@ program
     .description('Tool to add stylish captions to your video.')
     .version(packageJson.version)
     .argument('<file>', 'Path to the input SubRip Subtitle (.srt) file.', assertFileExtension('.srt'))
-    .option('-o, --output <file>', `Full or relative path where the created Films Apple QuickTime (MOV) file should be written.
-        By default, it will be saved in the same directory as the input subtitle file.`, assertFileExtension('.mov'))
-    .option('-w, --width <number>', 'Width of the video in pixels (default: 1080).', parseIntAndAssert(assertPositive('Width')), 1080)
-    .option('-h, --height <number>', 'Height of the video in pixels (default: 1920).', parseIntAndAssert(assertPositive('Height')), 1920)
-    .option('-s, --style <file>', `Full or relative path to the styles .css file.
-        If not provided, default styles for captions will be used.`, assertFileExtension('.css'))
-    .option('--preview', `Prevents the script from generating a video file. 
-        Instead, captions are displayed in the browser for debugging and preview purposes.`)
+    .option('-o, --output <file>', 'Full or relative path where the created Films Apple QuickTime (MOV) file should be written. ' +
+    'By default, it will be saved in the same directory as the input subtitle file.', assertFileExtension('.mov'))
+    .option('-w, --width <number>', 'Width of the video in pixels.', parseIntAndAssert(assertPositive('Width')), 1080)
+    .option('-h, --height <number>', 'Height of the video in pixels.', parseIntAndAssert(assertPositive('Height')), 1920)
+    .option('-r, --fps <number>', 'Specifies the frame rate (FPS) of the output video. Valid values are between 1 and 60.', parseIntAndAssert(assertMinMax('FPS', 1, 60)), 30)
+    .option('-s, --style <file>', 'Full or relative path to the styles .css file. ' +
+    'If not provided, default styles for captions will be used.', assertFileExtension('.css'))
+    .option('-a, --animate', 'Records captions with CSS3 animations. ' +
+    'Note: The recording will run for the entire duration of the video. ' +
+    'Use this option only if your captions involve CSS3 animations.')
+    .option('--preview', 'Prevents the script from generating a video file. ' +
+    'Instead, captions are displayed in the browser for debugging and preview purposes.')
     .action((inputFile, options) => {
     if (!options.output) {
         const fileBasename = inputFile.slice(0, -4);
@@ -232,7 +244,9 @@ function parseArgs() {
         movOutputFile: opts.output,
         videoWidth: opts.width,
         videoHeight: opts.height,
+        fps: opts.fps,
         styleFile: opts.style,
+        css3Animations: opts.animate,
         isPreview: opts.preview,
     };
 }
@@ -244,7 +258,9 @@ function printArgs(args) {
     Output:     ${args.movOutputFile}
     Width:      ${args.videoWidth} px
     Height:     ${args.videoHeight} px
+    FPS:        ${args.fps}
     Styles:     ${styles}
+    Animations: ${args.css3Animations ? 'yes' : 'no'}
     `;
     console.log(srt);
 }
@@ -371,6 +387,7 @@ class WorkDir {
         fs.symlinkSync(indexJs, path__namespace.join(this.workDir.name, 'index.js'));
         fs.symlinkSync(this.args.styleFile, path__namespace.join(this.workDir.name, 'captions.css'));
         this.setupCaptions();
+        this.setupPlayerArgs();
         this.setupVideoSizeCss();
         fs.mkdirSync(this.screenShotsDir);
         return index;
@@ -397,79 +414,13 @@ class WorkDir {
         const captionsJsFile = path__namespace.join(this.workDir.name, 'captions.js');
         fs.writeFileSync(captionsJsFile, captionsJs);
     }
-}
-
-class Recorder {
-    captions;
-    renderer;
-    progressBar;
-    browser = null;
-    page = null;
-    constructor(captions, renderer, progressBar) {
-        this.captions = captions;
-        this.renderer = renderer;
-        this.progressBar = progressBar;
-    }
-    async recordCaptionsVideo(indexHtml) {
-        this.progressBar.start(this.captions.length, 0);
-        try {
-            const videoElem = await this.launchBrowser(indexHtml);
-            this.renderer.startEncoding();
-            // Add empty frame before captions starts
-            const beginningTime = this.captions[0].startTimeMs;
-            this.renderer.addEmptyFrame(beginningTime);
-            for (let i = 0; i < this.captions.length; i++) {
-                const caption = this.captions[i];
-                await this.nextStep();
-                const screenShot = await this.takeScreenShot(videoElem);
-                this.renderer.addFrame(caption, screenShot);
-                // Add delay before the next frame
-                if (i < this.captions.length - 1) {
-                    const idleDelay = this.captions[i + 1].startTimeMs - caption.endTimeMs;
-                    if (idleDelay) {
-                        this.renderer.addEmptyFrame(idleDelay);
-                    }
-                }
-                this.progressBar.increment();
-            }
-            // Finish with en empty frame
-            this.renderer.addEmptyFrame();
-            this.progressBar.stop();
-            await this.renderer.render();
-        }
-        catch (error) {
-            console.error('Error during Puppeteer operation:', error);
-        }
-        finally {
-            await this.browser?.close();
-        }
-    }
-    async launchBrowser(indexHtml) {
-        this.browser = await puppeteer__namespace.launch({
-            args: [
-                '--disable-web-security', // Disable CORS
-                '--allow-file-access-from-files', // Allow file access
-            ],
-            headless: true,
-        });
-        this.page = await this.browser.newPage();
-        await this.page.goto(`file://${indexHtml}`);
-        await this.page.evaluate(() => {
-            return window.ready;
-        });
-        return this.page.$('#video');
-    }
-    async nextStep() {
-        await this.page.evaluate(() => {
-            window.Player.next();
-        });
-    }
-    async takeScreenShot(elem) {
-        const screenshotBuffer = await elem.screenshot({
-            encoding: 'binary',
-            omitBackground: true,
-        });
-        return pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
+    setupPlayerArgs() {
+        const playerArgs = {
+            isPreview: this.args.isPreview,
+        };
+        const argsJs = 'window.playerArgs = ' + JSON.stringify(playerArgs, null, 2);
+        const argsJsFile = path__namespace.join(this.workDir.name, 'player.args.js');
+        fs.writeFileSync(argsJsFile, argsJs);
     }
 }
 
@@ -594,19 +545,218 @@ class PreviewServer {
     }
 }
 
+class AbstractRecorder {
+    args;
+    browser = null;
+    page = null;
+    constructor(args) {
+        this.args = args;
+    }
+    async launchBrowser(indexHtml) {
+        this.browser = await puppeteer__namespace.launch({
+            args: [
+                '--disable-web-security', // Disable CORS
+                '--allow-file-access-from-files', // Allow file access
+            ],
+            headless: true,
+        });
+        this.page = await this.browser.newPage();
+        await this.page.goto(`file://${indexHtml}`);
+        await this.page.setViewport({
+            width: this.args.videoWidth,
+            height: this.args.videoHeight,
+        });
+        await this.page.evaluate(() => {
+            return window.ready;
+        });
+        return this.page.$('#video');
+    }
+}
+
+class VideoRecorder extends AbstractRecorder {
+    videoRenderer;
+    constructor(args, videoRenderer) {
+        super(args);
+        this.videoRenderer = videoRenderer;
+    }
+    async recordCaptionsVideo(indexHtml) {
+        try {
+            await this.launchBrowser(indexHtml);
+            const cdpSession = await this.page.createCDPSession();
+            await cdpSession.send('Emulation.setDefaultBackgroundColorOverride', { color: { r: 0, g: 0, b: 0, a: 0 } });
+            await cdpSession.send('Animation.setPlaybackRate', {
+                playbackRate: 1,
+            });
+            cdpSession.on('Page.screencastFrame', (frame) => this.handleScreenCastFrame(cdpSession, frame));
+            this.videoRenderer.startEncoding();
+            await cdpSession.send('Page.startScreencast', {
+                everyNthFrame: 1,
+                format: 'png',
+                quality: 100,
+            });
+            await this.page.evaluate(() => {
+                return new Promise((resolve) => {
+                    window.Player.onStop = resolve;
+                    window.Player.play();
+                });
+            });
+            await cdpSession.send('Page.stopScreencast');
+            this.videoRenderer.endEncoding();
+        }
+        catch (error) {
+            console.error('Error during Puppeteer operation:', error);
+        }
+        finally {
+            await this.browser?.close();
+        }
+    }
+    async handleScreenCastFrame(cdpSession, frame) {
+        const { sessionId, data } = frame;
+        await cdpSession.send('Page.screencastFrameAck', { sessionId });
+        const frameBuffer = Buffer.from(data, 'base64');
+        this.videoRenderer.addFrame(frameBuffer);
+    }
+}
+
+class VideoRenderer {
+    args;
+    inputStream = null;
+    intervalId = null;
+    lastFrame;
+    constructor(args) {
+        this.args = args;
+        const empty = new pngjs.PNG({
+            width: this.args.videoWidth,
+            height: this.args.videoHeight,
+            colorType: 6,
+        });
+        this.lastFrame = pngjs.PNG.sync.write(empty);
+    }
+    startEncoding() {
+        this.inputStream = new stream.PassThrough();
+        const statsPrinter = new StatsPrinter();
+        const command = ffmpeg()
+            .input(this.inputStream)
+            .inputOptions([
+            '-f image2pipe', // Format of input frames
+            '-pix_fmt yuva444p10le', // Lossless setting
+            `-s ${this.args.videoWidth}x${this.args.videoHeight}`, // Frame size
+            `-r ${this.args.fps}`, // Framerate
+        ])
+            .outputOptions([
+            '-c:v prores_ks', // codec for Films Apple QuickTime (MOV)
+            '-profile:v 4444', // enable the best quality
+            '-pix_fmt yuva444p10le', // lossless setting
+            '-q:v 0', // lossless setting
+            '-vendor ap10' // ensures the output MOV file is compatible with Apple QuickTime
+        ])
+            .on('start', () => {
+            console.log('FFmpeg process started.');
+        })
+            .on('progress', (progress) => {
+            statsPrinter.print(progress);
+        })
+            .on('end', () => {
+            console.log('FFmpeg process completed.');
+        })
+            .on('error', (err) => {
+            console.error('An error occurred:', err.message);
+        })
+            .output(this.args.movOutputFile);
+        command.run();
+        // Produce frames in required rate
+        const intervalDuration = Math.round(1000 / 30);
+        this.intervalId = setInterval(() => {
+            this.inputStream.write(this.lastFrame);
+        }, intervalDuration);
+    }
+    addFrame(frame) {
+        this.lastFrame = frame;
+    }
+    endEncoding() {
+        clearTimeout(this.intervalId);
+        this.inputStream.end();
+    }
+}
+
+class StepRecorder extends AbstractRecorder {
+    captions;
+    renderer;
+    progressBar;
+    constructor(args, captions, renderer, progressBar) {
+        super(args);
+        this.captions = captions;
+        this.renderer = renderer;
+        this.progressBar = progressBar;
+    }
+    async recordCaptionsVideo(indexHtml) {
+        this.progressBar.start(this.captions.length, 0);
+        try {
+            const videoElem = await this.launchBrowser(indexHtml);
+            this.renderer.startEncoding();
+            // Add empty frame before captions starts
+            const beginningTime = this.captions[0].startTimeMs;
+            this.renderer.addEmptyFrame(beginningTime);
+            for (let i = 0; i < this.captions.length; i++) {
+                const caption = this.captions[i];
+                await this.nextStep();
+                const screenShot = await this.takeScreenShot(videoElem);
+                this.renderer.addFrame(caption, screenShot);
+                // Add delay before the next frame
+                if (i < this.captions.length - 1) {
+                    const idleDelay = this.captions[i + 1].startTimeMs - caption.endTimeMs;
+                    if (idleDelay) {
+                        this.renderer.addEmptyFrame(idleDelay);
+                    }
+                }
+                this.progressBar.increment();
+            }
+            // Finish with en empty frame
+            this.renderer.addEmptyFrame();
+            this.progressBar.stop();
+            await this.renderer.render();
+        }
+        catch (error) {
+            console.error('Error during Puppeteer operation:', error);
+        }
+        finally {
+            await this.browser?.close();
+        }
+    }
+    async nextStep() {
+        await this.page.evaluate(() => {
+            window.Player.next();
+        });
+    }
+    async takeScreenShot(elem) {
+        const screenshotBuffer = await elem.screenshot({
+            encoding: 'binary',
+            omitBackground: true,
+        });
+        return pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
+    }
+}
+
 const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
 const progressBar = createProgressBar();
 const workDir = new WorkDir(captions, cliArgs);
 const renderer = new Renderer(cliArgs, workDir);
-const recorder = new Recorder(captions, renderer, progressBar);
+const stepRecorder = new StepRecorder(cliArgs, captions, renderer, progressBar);
+const videoRenderer = new VideoRenderer(cliArgs);
+const videoRecorder = new VideoRecorder(cliArgs, videoRenderer);
 const previewServer = new PreviewServer(workDir);
 (async () => {
     try {
         const indexHtml = workDir.setup();
         printArgs(cliArgs);
         if (!cliArgs.isPreview) {
-            await recorder.recordCaptionsVideo(indexHtml);
+            if (cliArgs.css3Animations) {
+                await videoRecorder.recordCaptionsVideo(indexHtml);
+            }
+            else {
+                await stepRecorder.recordCaptionsVideo(indexHtml);
+            }
         }
         else {
             console.log('Launching preview server...');

@@ -142,13 +142,17 @@
         }
     }
 
-    const _hoisted_1 = { class: "field has-addons has-addons-centered" };
-    const _hoisted_2 = { class: "control" };
-    const _hoisted_3 = ["disabled"];
-    const _hoisted_4 = { class: "control" };
-    const _hoisted_5 = { class: "icon is-small" };
-    const _hoisted_6 = { class: "control" };
-    const _hoisted_7 = ["disabled"];
+    const _hoisted_1 = {
+        id: "player-controller",
+        class: "section is-small"
+    };
+    const _hoisted_2 = { class: "field has-addons has-addons-centered" };
+    const _hoisted_3 = { class: "control" };
+    const _hoisted_4 = ["disabled"];
+    const _hoisted_5 = { class: "control" };
+    const _hoisted_6 = { class: "icon is-small" };
+    const _hoisted_7 = { class: "control" };
+    const _hoisted_8 = ["disabled"];
     var script = /*@__PURE__*/ vue.defineComponent({
         __name: 'player.component',
         setup(__props) {
@@ -182,43 +186,45 @@
                 playerState.isEnd = window.Player.isEnd;
             }
             return (_ctx, _cache) => {
-                return (vue.openBlock(), vue.createElementBlock("div", _hoisted_1, [
-                    vue.createElementVNode("p", _hoisted_2, [
-                        vue.createElementVNode("button", {
-                            class: "button is-rounded",
-                            disabled: playerState.isBeginning || playerState.isPlaying,
-                            onClick: _cache[0] || (_cache[0] = ($event) => (prec()))
-                        }, _cache[3] || (_cache[3] = [
-                            vue.createElementVNode("span", { class: "icon is-small" }, [
-                                vue.createElementVNode("i", { class: "fa fa-backward" })
-                            ], -1 /* HOISTED */),
-                            vue.createElementVNode("span", null, "Prec", -1 /* HOISTED */)
-                        ]), 8 /* PROPS */, _hoisted_3)
-                    ]),
-                    vue.createElementVNode("p", _hoisted_4, [
-                        vue.createElementVNode("button", {
-                            class: vue.normalizeClass(["button", [playerState.isPlaying ? 'is-danger' : 'is-primary']]),
-                            onClick: _cache[1] || (_cache[1] = ($event) => (togglePlay()))
-                        }, [
-                            vue.createElementVNode("span", _hoisted_5, [
-                                vue.createElementVNode("i", {
-                                    class: vue.normalizeClass(["fa", [playerState.isPlaying ? 'fa-stop' : 'fa-play']])
-                                }, null, 2 /* CLASS */)
-                            ]),
-                            _cache[4] || (_cache[4] = vue.createElementVNode("span", null, "Play", -1 /* HOISTED */))
-                        ], 2 /* CLASS */)
-                    ]),
-                    vue.createElementVNode("p", _hoisted_6, [
-                        vue.createElementVNode("button", {
-                            class: "button is-rounded",
-                            disabled: playerState.isEnd || playerState.isPlaying,
-                            onClick: _cache[2] || (_cache[2] = ($event) => (next()))
-                        }, _cache[5] || (_cache[5] = [
-                            vue.createElementVNode("span", { class: "icon is-small" }, [
-                                vue.createElementVNode("i", { class: "fa fa-forward" })
-                            ], -1 /* HOISTED */),
-                            vue.createElementVNode("span", null, "Next", -1 /* HOISTED */)
-                        ]), 8 /* PROPS */, _hoisted_7)
+                return (vue.openBlock(), vue.createElementBlock("section", _hoisted_1, [
+                    vue.createElementVNode("div", _hoisted_2, [
+                        vue.createElementVNode("p", _hoisted_3, [
+                            vue.createElementVNode("button", {
+                                class: "button is-rounded",
+                                disabled: playerState.isBeginning || playerState.isPlaying,
+                                onClick: _cache[0] || (_cache[0] = ($event) => (prec()))
+                            }, _cache[3] || (_cache[3] = [
+                                vue.createElementVNode("span", { class: "icon is-small" }, [
+                                    vue.createElementVNode("i", { class: "fa fa-backward" })
+                                ], -1 /* HOISTED */),
+                                vue.createElementVNode("span", null, "Prec", -1 /* HOISTED */)
+                            ]), 8 /* PROPS */, _hoisted_4)
+                        ]),
+                        vue.createElementVNode("p", _hoisted_5, [
+                            vue.createElementVNode("button", {
+                                class: vue.normalizeClass(["button", [playerState.isPlaying ? 'is-danger' : 'is-primary']]),
+                                onClick: _cache[1] || (_cache[1] = ($event) => (togglePlay()))
+                            }, [
+                                vue.createElementVNode("span", _hoisted_6, [
+                                    vue.createElementVNode("i", {
+                                        class: vue.normalizeClass(["fa", [playerState.isPlaying ? 'fa-stop' : 'fa-play']])
+                                    }, null, 2 /* CLASS */)
+                                ]),
+                                _cache[4] || (_cache[4] = vue.createElementVNode("span", null, "Play", -1 /* HOISTED */))
+                            ], 2 /* CLASS */)
+                        ]),
+                        vue.createElementVNode("p", _hoisted_7, [
+                            vue.createElementVNode("button", {
+                                class: "button is-rounded",
+                                disabled: playerState.isEnd || playerState.isPlaying,
+                                onClick: _cache[2] || (_cache[2] = ($event) => (next()))
+                            }, _cache[5] || (_cache[5] = [
+                                vue.createElementVNode("span", { class: "icon is-small" }, [
+                                    vue.createElementVNode("i", { class: "fa fa-forward" })
+                                ], -1 /* HOISTED */),
+                                vue.createElementVNode("span", null, "Next", -1 /* HOISTED */)
+                            ]), 8 /* PROPS */, _hoisted_8)
+                        ])
                     ])
                 ]));
             };
@@ -231,9 +237,11 @@
         window.onload = () => {
             const videoElem = document.getElementById('video');
             window.Player = new Player(videoElem, window.captions);
-            vue.createApp({})
-                .component('player', script)
-                .mount('#player-controller');
+            if (window.playerArgs.isPreview) {
+                vue.createApp({})
+                    .component('player', script)
+                    .mount('#player-controller');
+            }
             resolve();
         };
     });

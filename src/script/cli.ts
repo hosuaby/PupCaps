@@ -9,7 +9,9 @@ export interface Args {
     movOutputFile: string;
     videoWidth: number;
     videoHeight: number;
+    fps: number;
     styleFile: string;
+    css3Animations: boolean;
     isPreview: boolean;
 }
 
@@ -25,6 +27,14 @@ function assertPositive(option: string): (v: number) => void {
     return (value: number) => {
         if (value < 0) {
             throw new Error(`${option} should be positive!`);
+        }
+    };
+}
+
+function assertMinMax(option: string, min: number, max: number): (v: number) => void {
+    return (value: number) => {
+        if (value < min || value > max) {
+            throw new Error(`${option} should be between ${min} and ${max}!`);
         }
     };
 }
@@ -46,24 +56,32 @@ program
     .version(packageJson.version)
     .argument('<file>', 'Path to the input SubRip Subtitle (.srt) file.', assertFileExtension('.srt'))
     .option('-o, --output <file>',
-        `Full or relative path where the created Films Apple QuickTime (MOV) file should be written.
-        By default, it will be saved in the same directory as the input subtitle file.`,
+        'Full or relative path where the created Films Apple QuickTime (MOV) file should be written. ' +
+        'By default, it will be saved in the same directory as the input subtitle file.',
         assertFileExtension('.mov'))
     .option('-w, --width <number>',
-        'Width of the video in pixels (default: 1080).',
+        'Width of the video in pixels.',
         parseIntAndAssert(assertPositive('Width')),
         1080)
     .option('-h, --height <number>',
-        'Height of the video in pixels (default: 1920).',
+        'Height of the video in pixels.',
         parseIntAndAssert(assertPositive('Height')),
         1920)
+    .option('-r, --fps <number>',
+        'Specifies the frame rate (FPS) of the output video. Valid values are between 1 and 60.',
+        parseIntAndAssert(assertMinMax('FPS', 1, 60)),
+        30)
     .option('-s, --style <file>',
-        `Full or relative path to the styles .css file.
-        If not provided, default styles for captions will be used.`,
+        'Full or relative path to the styles .css file. ' +
+        'If not provided, default styles for captions will be used.',
         assertFileExtension('.css'))
+    .option('-a, --animate',
+        'Records captions with CSS3 animations. ' +
+        'Note: The recording will run for the entire duration of the video. ' +
+        'Use this option only if your captions involve CSS3 animations.')
     .option('--preview',
-        `Prevents the script from generating a video file. 
-        Instead, captions are displayed in the browser for debugging and preview purposes.`)
+        'Prevents the script from generating a video file. ' +
+        'Instead, captions are displayed in the browser for debugging and preview purposes.')
     .action((inputFile, options: any) => {
         if (!options.output) {
             const fileBasename = (inputFile as any as string).slice(0, -4);
@@ -86,7 +104,9 @@ export function parseArgs(): Args {
         movOutputFile: opts.output,
         videoWidth: opts.width,
         videoHeight: opts.height,
+        fps: opts.fps,
         styleFile: opts.style,
+        css3Animations: opts.animate,
         isPreview: opts.preview,
     };
 }
@@ -100,7 +120,9 @@ export function printArgs(args: Args) {
     Output:     ${args.movOutputFile}
     Width:      ${args.videoWidth} px
     Height:     ${args.videoHeight} px
+    FPS:        ${args.fps}
     Styles:     ${styles}
+    Animations: ${ args.css3Animations ? 'yes' : 'no' }
     `;
 
     console.log(srt);

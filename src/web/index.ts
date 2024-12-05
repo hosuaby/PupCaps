@@ -7,9 +7,11 @@ window.ready = new Promise((resolve, reject) => {
         const videoElem = document.getElementById('video');
         window.Player = new Player(videoElem!, window.captions);
 
-        createApp({})
-            .component('player', PlayerComponent)
-            .mount('#player-controller');
+        if (window.playerArgs.isPreview) {
+            createApp({})
+                .component('player', PlayerComponent)
+                .mount('#player-controller');
+        }
 
         resolve();
     };

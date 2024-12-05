@@ -1,9 +1,11 @@
 import {createProgressBar, parseArgs, printArgs} from './cli';
 import {parseCaptions} from './srt-captions-reader';
 import {WorkDir} from './work-dir';
-import {Recorder} from './recorder';
 import {Renderer} from './renderer';
 import {PreviewServer} from './preview-server';
+import {VideoRecorder} from './video-recorder';
+import {VideoRenderer} from './video-renderer';
+import {StepRecorder} from './step-recorder';
 
 const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
@@ -11,7 +13,9 @@ const progressBar = createProgressBar();
 
 const workDir = new WorkDir(captions, cliArgs);
 const renderer = new Renderer(cliArgs, workDir);
-const recorder = new Recorder(captions, renderer, progressBar);
+const stepRecorder = new StepRecorder(cliArgs, captions, renderer, progressBar);
+const videoRenderer = new VideoRenderer(cliArgs);
+const videoRecorder = new VideoRecorder(cliArgs, videoRenderer);
 const previewServer = new PreviewServer(workDir);
 
 (async () => {
@@ -20,7 +24,11 @@ const previewServer = new PreviewServer(workDir);
         printArgs(cliArgs);
 
         if (!cliArgs.isPreview) {
-            await recorder.recordCaptionsVideo(indexHtml);
+            if (cliArgs.css3Animations) {
+                await videoRecorder.recordCaptionsVideo(indexHtml);
+            } else {
+                await stepRecorder.recordCaptionsVideo(indexHtml);
+            }
         } else {
             console.log('Launching preview server...');
             await previewServer.start();
