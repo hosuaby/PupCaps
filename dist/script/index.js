@@ -119,6 +119,8 @@ var keywords = [
 	"video"
 ];
 var dependencies = {
+	"@fortawesome/fontawesome-free": "^6.7.1",
+	bulma: "^1.0.2",
 	"cli-progress": "^3.12.0",
 	commander: "^12.1.0",
 	"fluent-ffmpeg": "^2.1.3",
@@ -176,6 +178,7 @@ const assetsFolder = path__namespace.join(__dirname, '..', '..', 'assets');
 const defaultStylesCss = path__namespace.join(assetsFolder, 'captions.css');
 const indexHtml = path__namespace.join(assetsFolder, 'index.html');
 const indexJs = path__namespace.join(__dirname, '..', 'web', 'index.js');
+const nodeModules = path__namespace.join(__dirname, '..', '..', 'node_modules');
 
 function parseIntAndAssert(...assertions) {
     return (value) => {
@@ -386,6 +389,7 @@ class WorkDir {
         fs.symlinkSync(indexHtml, index);
         fs.symlinkSync(indexJs, path__namespace.join(this.workDir.name, 'index.js'));
         fs.symlinkSync(this.args.styleFile, path__namespace.join(this.workDir.name, 'captions.css'));
+        fs.symlinkSync(nodeModules, path__namespace.join(this.workDir.name, 'node_modules'));
         this.setupCaptions();
         this.setupPlayerArgs();
         this.setupVideoSizeCss();

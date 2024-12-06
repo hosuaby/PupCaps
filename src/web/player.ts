@@ -1,16 +1,5 @@
 import {Caption} from '../common/caption';
 import {renderCaption} from './renderer';
-import {Timeline} from './timeline';
-
-interface Event {
-    timeMs: number;
-    toShow: HTMLDivElement[];
-    toHide: HTMLDivElement[];
-}
-
-interface Events {
-    [key: number]: Event;
-}
 
 export class Player {
     public onStop = () => {};
@@ -18,7 +7,8 @@ export class Player {
     private index = 0;
     private readonly captionsContainer: Element;
     private readonly rendered: HTMLDivElement[] = [];
-    private timeline: Timeline | null = null;
+    private timeoutIds: NodeJS.Timeout[] = [];
+    private displayedCaptionId: number | null = null;
 
     constructor(private readonly videoElem: HTMLElement,
                 private readonly captions: Caption[]) {
@@ -33,44 +23,44 @@ export class Player {
         this.index = 0;
         this.rendered.forEach(captionElem => captionElem.remove());
 
-        const eventTimeline: Events = {};
+        if (this.captions.length === 0) {
+            return;
+        }
 
         for (let i = 0; i < this.captions.length; i++) {
             const caption = this.captions[i];
+            const displayTimeoutId = setTimeout(() => {
+                this.displayCaption(caption.index);
+            }, caption.startTimeMs);
 
-            eventTimeline[caption.startTimeMs] ||= {
-                timeMs: caption.startTimeMs,
-                toShow: [],
-                toHide: [],
+            let hideTimeoutId: NodeJS.Timeout;
+            if (i < this.captions.length - 1) {
+                hideTimeoutId = setTimeout(() => {
+                    this.hideCaption(caption.index);
+                }, caption.endTimeMs);
+            } else {
+                hideTimeoutId = setTimeout(() => {
+                    this.hideCaption(caption.index);
+                    this.stop();
+                }, caption.endTimeMs);
             }
 
-            eventTimeline[caption.endTimeMs] ||= {
-                timeMs: caption.endTimeMs,
-                toShow: [],
-                toHide: [],
-            }
-
-            const renderedIndex = i + 1;
-            eventTimeline[caption.startTimeMs].toShow.push(this.rendered[renderedIndex]);
-            eventTimeline[caption.endTimeMs].toHide.push(this.rendered[renderedIndex]);
+            this.timeoutIds.push(displayTimeoutId, hideTimeoutId);
         }
-
-        this.timeline = new Timeline(this.onStop);
-
-        for (const event of Object.values(eventTimeline) as Event[]) {
-            this.timeline!.schedule(event.timeMs, () => {
-                event.toHide.forEach(elem => elem.remove());
-                event.toShow.forEach(elem => this.captionsContainer.appendChild(elem));
-            });
-        }
-
-        this.timeline.run();
     }
 
     public stop() {
-        this.timeline!.stop();
-        this.rendered.forEach(elem => elem.remove());
+        if (this.displayedCaptionId) {
+            this.rendered[this.displayedCaptionId].remove();
+            this.displayedCaptionId = null;
+        }
+
+        while (this.timeoutIds.length) {
+            clearTimeout(this.timeoutIds.pop());
+        }
+
         this.index = 0;
+        this.onStop();
     }
 
     public prec() {
@@ -105,5 +95,27 @@ export class Player {
 
     public get isEnd(): boolean {
         return this.index === this.captions.length
+    }
+
+    private displayCaption(index: number) {
+        if (this.displayedCaptionId === index) {
+            return;     // Displayed already, do nothing
+        }
+
+        if (this.displayedCaptionId) {
+            this.rendered[this.displayedCaptionId].remove();
+        }
+
+        this.captionsContainer.appendChild(this.rendered[index]);
+        this.displayedCaptionId = index;
+    }
+
+    private hideCaption(index: number) {
+        if (this.displayedCaptionId != index) {
+            return;     // Removed already, do nothing
+        }
+
+        this.rendered[index].remove();
+        this.displayedCaptionId = null;
     }
 }

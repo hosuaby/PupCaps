@@ -27,41 +27,6 @@
         return captionDiv;
     }
 
-    class Timeline {
-        onEnd;
-        tasks = [];
-        timeoutId = null;
-        constructor(onEnd) {
-            this.onEnd = onEnd;
-        }
-        schedule(timeMs, task) {
-            this.tasks.push({ timeMs, task });
-        }
-        run() {
-            this.tasks.sort((a, b) => a.timeMs - b.timeMs);
-            if (!this.tasks.length) {
-                throw new Error('Event queue is empty!');
-            }
-            const first = this.tasks[0];
-            this.timeoutId = setTimeout(() => this.exec(first.timeMs, 0), first.timeMs);
-        }
-        stop() {
-            clearTimeout(this.timeoutId);
-            this.onEnd();
-        }
-        exec(timeMs, index) {
-            this.tasks[index].task();
-            if (index < this.tasks.length - 1) {
-                const next = this.tasks[index + 1];
-                const timeout = next.timeMs - timeMs;
-                this.timeoutId = setTimeout(() => this.exec(next.timeMs, index + 1), timeout);
-            }
-            else {
-                this.onEnd();
-            }
-        }
-    }
-
     class Player {
         videoElem;
         captions;
@@ -69,7 +34,8 @@
         index = 0;
         captionsContainer;
         rendered = [];
-        timeline = null;
+        timeoutIds = [];
+        displayedCaptionId = null;
         constructor(videoElem, captions) {
             this.videoElem = videoElem;
             this.captions = captions;
@@ -81,36 +47,39 @@
         play() {
             this.index = 0;
             this.rendered.forEach(captionElem => captionElem.remove());
-            const eventTimeline = {};
+            if (this.captions.length === 0) {
+                return;
+            }
             for (let i = 0; i < this.captions.length; i++) {
                 const caption = this.captions[i];
-                eventTimeline[caption.startTimeMs] ||= {
-                    timeMs: caption.startTimeMs,
-                    toShow: [],
-                    toHide: [],
-                };
-                eventTimeline[caption.endTimeMs] ||= {
-                    timeMs: caption.endTimeMs,
-                    toShow: [],
-                    toHide: [],
-                };
-                const renderedIndex = i + 1;
-                eventTimeline[caption.startTimeMs].toShow.push(this.rendered[renderedIndex]);
-                eventTimeline[caption.endTimeMs].toHide.push(this.rendered[renderedIndex]);
+                const displayTimeoutId = setTimeout(() => {
+                    this.displayCaption(caption.index);
+                }, caption.startTimeMs);
+                let hideTimeoutId;
+                if (i < this.captions.length - 1) {
+                    hideTimeoutId = setTimeout(() => {
+                        this.hideCaption(caption.index);
+                    }, caption.endTimeMs);
+                }
+                else {
+                    hideTimeoutId = setTimeout(() => {
+                        this.hideCaption(caption.index);
+                        this.stop();
+                    }, caption.endTimeMs);
+                }
+                this.timeoutIds.push(displayTimeoutId, hideTimeoutId);
             }
-            this.timeline = new Timeline(this.onStop);
-            for (const event of Object.values(eventTimeline)) {
-                this.timeline.schedule(event.timeMs, () => {
-                    event.toHide.forEach(elem => elem.remove());
-                    event.toShow.forEach(elem => this.captionsContainer.appendChild(elem));
-                });
-            }
-            this.timeline.run();
         }
         stop() {
-            this.timeline.stop();
-            this.rendered.forEach(elem => elem.remove());
+            if (this.displayedCaptionId) {
+                this.rendered[this.displayedCaptionId].remove();
+                this.displayedCaptionId = null;
+            }
+            while (this.timeoutIds.length) {
+                clearTimeout(this.timeoutIds.pop());
+            }
             this.index = 0;
+            this.onStop();
         }
         prec() {
             if (!this.isBeginning) {
@@ -139,6 +108,23 @@
         }
         get isEnd() {
             return this.index === this.captions.length;
+        }
+        displayCaption(index) {
+            if (this.displayedCaptionId === index) {
+                return; // Displayed already, do nothing
+            }
+            if (this.displayedCaptionId) {
+                this.rendered[this.displayedCaptionId].remove();
+            }
+            this.captionsContainer.appendChild(this.rendered[index]);
+            this.displayedCaptionId = index;
+        }
+        hideCaption(index) {
+            if (this.displayedCaptionId != index) {
+                return; // Removed already, do nothing
+            }
+            this.rendered[index].remove();
+            this.displayedCaptionId = null;
         }
     }
 

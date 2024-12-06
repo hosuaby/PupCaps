@@ -3,7 +3,7 @@ import * as path from 'path';
 import {writeFileSync, symlinkSync, rmSync, mkdirSync} from 'fs';
 import {Caption} from '../common/caption';
 import {Args} from './cli';
-import {indexHtml, indexJs} from './assets';
+import {indexHtml, indexJs, nodeModules} from './assets';
 import {PlayerArgs} from '../common/player-args';
 
 export class WorkDir {
@@ -19,6 +19,7 @@ export class WorkDir {
         symlinkSync(indexHtml, index);
         symlinkSync(indexJs, path.join(this.workDir.name, 'index.js'));
         symlinkSync(this.args.styleFile, path.join(this.workDir.name, 'captions.css'));
+        symlinkSync(nodeModules, path.join(this.workDir.name, 'node_modules'));
 
         this.setupCaptions();
         this.setupPlayerArgs();

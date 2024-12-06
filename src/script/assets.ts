@@ -5,3 +5,5 @@ export const defaultStylesCss = path.join(assetsFolder, 'captions.css');
 export const indexHtml = path.join(assetsFolder, 'index.html');
 
 export const indexJs = path.join(__dirname, '..', 'web', 'index.js');
+
+export const nodeModules = path.join(__dirname, '..', '..', 'node_modules');
