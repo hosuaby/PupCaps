@@ -4,15 +4,16 @@ import * as path from 'path';
 import {appendFileSync, writeFileSync} from 'fs';
 import {WorkDir} from './work-dir';
 import {Caption} from '../common/caption';
-import ffmpeg from 'fluent-ffmpeg';
 import {StatsPrinter} from './stats-printer';
+import {AbstractRenderer} from './abstract-renderer';
 
-export class Renderer {
+export class StepRenderer extends AbstractRenderer {
     private readonly framesFileName: string;
     private readonly emptyFrameFileName: string;
 
-    constructor(private readonly args : Args,
+    constructor(args : Args,
                 private readonly workDir: WorkDir) {
+        super(args);
         this.framesFileName = path.join(workDir.screenShotsDir, 'frames.txt');
         this.emptyFrameFileName = path.join(workDir.screenShotsDir, 'empty.png');
     }
@@ -49,25 +50,17 @@ export class Renderer {
             'utf8');
     }
 
-    public async render() {
+    public async endEncoding() {
         console.log(`Encoding ${this.args.movOutputFile}...\n`);
         const statsPrinter = new StatsPrinter();
 
         await new Promise((resolve, reject) => {
-            ffmpeg()
+            this.baseFfmpegCommand()
                 .input(this.framesFileName)
                 .inputOptions([
                     '-f concat',    // concat frames from the frame list
                     '-safe 0'       // to prevent errors related to unsafe filenames
                 ])
-                .outputOptions([
-                    '-c:v prores_ks',           // codec for Films Apple QuickTime (MOV)
-                    '-profile:v 4444',          // enable the best quality
-                    '-pix_fmt yuva444p10le',    // lossless setting
-                    '-q:v 0',                   // lossless setting
-                    '-vendor ap10'              // ensures the output MOV file is compatible with Apple QuickTime
-                ])
-                .output(this.args.movOutputFile)
                 .on('progress', (progress: Object) => {
                     statsPrinter.print(progress);
                 })

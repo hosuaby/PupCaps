@@ -1,22 +1,28 @@
-import {createProgressBar, parseArgs, printArgs} from './cli';
+import {Args, createProgressBar, parseArgs, printArgs} from './cli';
 import {parseCaptions} from './srt-captions-reader';
 import {WorkDir} from './work-dir';
-import {Renderer} from './renderer';
+import {StepRenderer} from './step-renderer';
 import {PreviewServer} from './preview-server';
-import {VideoRecorder} from './video-recorder';
-import {VideoRenderer} from './video-renderer';
+import {RealTimeRecorder} from './real-time-recorder';
+import {RealTimeRenderer} from './real-time-renderer';
 import {StepRecorder} from './step-recorder';
+import {AbstractRecorder} from './abstract-recorder';
+import {Caption} from '../common/caption';
+
+function createRecorder(args: Args, captions: Caption[], workDir: WorkDir): AbstractRecorder {
+    if (args.css3Animations) {
+        const realTimeRenderer = new RealTimeRenderer(args);
+        return new RealTimeRecorder(args, realTimeRenderer);
+    } else {
+        const progressBar = createProgressBar();
+        const stepRenderer = new StepRenderer(args, workDir);
+        return  new StepRecorder(args, captions, stepRenderer, progressBar);
+    }
+}
 
 const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
-const progressBar = createProgressBar();
-
 const workDir = new WorkDir(captions, cliArgs);
-const renderer = new Renderer(cliArgs, workDir);
-const stepRecorder = new StepRecorder(cliArgs, captions, renderer, progressBar);
-const videoRenderer = new VideoRenderer(cliArgs);
-const videoRecorder = new VideoRecorder(cliArgs, videoRenderer);
-const previewServer = new PreviewServer(workDir);
 
 (async () => {
     try {
@@ -24,13 +30,11 @@ const previewServer = new PreviewServer(workDir);
         printArgs(cliArgs);
 
         if (!cliArgs.isPreview) {
-            if (cliArgs.css3Animations) {
-                await videoRecorder.recordCaptionsVideo(indexHtml);
-            } else {
-                await stepRecorder.recordCaptionsVideo(indexHtml);
-            }
+            const recorder = createRecorder(cliArgs, captions, workDir);
+            await recorder.recordCaptionsVideo(indexHtml);
         } else {
             console.log('Launching preview server...');
+            const previewServer = new PreviewServer(workDir);
             await previewServer.start();
         }
         console.log('Done!');

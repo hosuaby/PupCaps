@@ -2,14 +2,14 @@ import * as puppeteer from 'puppeteer';
 import * as cliProgress from 'cli-progress';
 import {PNG, PNGWithMetadata} from 'pngjs';
 import {Caption} from '../common/caption';
-import {Renderer} from './renderer';
+import {StepRenderer} from './step-renderer';
 import {Args} from './cli';
 import {AbstractRecorder} from './abstract-recorder';
 
 export class StepRecorder extends AbstractRecorder {
     constructor(args: Args,
                 private readonly captions: Caption[],
-                private readonly renderer: Renderer,
+                private readonly renderer: StepRenderer,
                 private readonly progressBar: cliProgress.SingleBar) {
         super(args);
     }
@@ -49,7 +49,7 @@ export class StepRecorder extends AbstractRecorder {
             this.renderer.addEmptyFrame();
 
             this.progressBar.stop();
-            await this.renderer.render();
+            await this.renderer.endEncoding();
         } catch (error) {
             console.error('Error during Puppeteer operation:', error);
         } finally {

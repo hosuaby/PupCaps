@@ -440,13 +440,30 @@ class StatsPrinter {
     }
 }
 
-class Renderer {
+class AbstractRenderer {
     args;
+    constructor(args) {
+        this.args = args;
+    }
+    baseFfmpegCommand() {
+        return ffmpeg()
+            .outputOptions([
+            '-c:v prores_ks', // codec for Films Apple QuickTime (MOV)
+            '-profile:v 4444', // enable the best quality
+            '-pix_fmt yuva444p10le', // lossless setting
+            '-q:v 0', // lossless setting
+            '-vendor ap10' // ensures the output MOV file is compatible with Apple QuickTime
+        ])
+            .output(this.args.movOutputFile);
+    }
+}
+
+class StepRenderer extends AbstractRenderer {
     workDir;
     framesFileName;
     emptyFrameFileName;
     constructor(args, workDir) {
-        this.args = args;
+        super(args);
         this.workDir = workDir;
         this.framesFileName = path__namespace.join(workDir.screenShotsDir, 'frames.txt');
         this.emptyFrameFileName = path__namespace.join(workDir.screenShotsDir, 'empty.png');
@@ -473,24 +490,16 @@ class Renderer {
         const durationSec = (caption.endTimeMs - caption.startTimeMs) / 1000;
         fs.appendFileSync(this.framesFileName, `file '${screenShotFileName}'\nduration ${durationSec}\n`, 'utf8');
     }
-    async render() {
+    async endEncoding() {
         console.log(`Encoding ${this.args.movOutputFile}...\n`);
         const statsPrinter = new StatsPrinter();
         await new Promise((resolve, reject) => {
-            ffmpeg()
+            this.baseFfmpegCommand()
                 .input(this.framesFileName)
                 .inputOptions([
                 '-f concat', // concat frames from the frame list
                 '-safe 0' // to prevent errors related to unsafe filenames
             ])
-                .outputOptions([
-                '-c:v prores_ks', // codec for Films Apple QuickTime (MOV)
-                '-profile:v 4444', // enable the best quality
-                '-pix_fmt yuva444p10le', // lossless setting
-                '-q:v 0', // lossless setting
-                '-vendor ap10' // ensures the output MOV file is compatible with Apple QuickTime
-            ])
-                .output(this.args.movOutputFile)
                 .on('progress', (progress) => {
                 statsPrinter.print(progress);
             })
@@ -573,7 +582,7 @@ class AbstractRecorder {
     }
 }
 
-class VideoRecorder extends AbstractRecorder {
+class RealTimeRecorder extends AbstractRecorder {
     videoRenderer;
     constructor(args, videoRenderer) {
         super(args);
@@ -618,13 +627,12 @@ class VideoRecorder extends AbstractRecorder {
     }
 }
 
-class VideoRenderer {
-    args;
+class RealTimeRenderer extends AbstractRenderer {
     inputStream = null;
     intervalId = null;
     lastFrame;
     constructor(args) {
-        this.args = args;
+        super(args);
         const empty = new pngjs.PNG({
             width: this.args.videoWidth,
             height: this.args.videoHeight,
@@ -635,20 +643,13 @@ class VideoRenderer {
     startEncoding() {
         this.inputStream = new stream.PassThrough();
         const statsPrinter = new StatsPrinter();
-        const command = ffmpeg()
+        const command = this.baseFfmpegCommand()
             .input(this.inputStream)
             .inputOptions([
             '-f image2pipe', // Format of input frames
             '-pix_fmt yuva444p10le', // Lossless setting
             `-s ${this.args.videoWidth}x${this.args.videoHeight}`, // Frame size
             `-r ${this.args.fps}`, // Framerate
-        ])
-            .outputOptions([
-            '-c:v prores_ks', // codec for Films Apple QuickTime (MOV)
-            '-profile:v 4444', // enable the best quality
-            '-pix_fmt yuva444p10le', // lossless setting
-            '-q:v 0', // lossless setting
-            '-vendor ap10' // ensures the output MOV file is compatible with Apple QuickTime
         ])
             .on('start', () => {
             console.log('FFmpeg process started.');
@@ -661,8 +662,7 @@ class VideoRenderer {
         })
             .on('error', (err) => {
             console.error('An error occurred:', err.message);
-        })
-            .output(this.args.movOutputFile);
+        });
         command.run();
         // Produce frames in required rate
         const intervalDuration = Math.round(1000 / 30);
@@ -714,7 +714,7 @@ class StepRecorder extends AbstractRecorder {
             // Finish with en empty frame
             this.renderer.addEmptyFrame();
             this.progressBar.stop();
-            await this.renderer.render();
+            await this.renderer.endEncoding();
         }
         catch (error) {
             console.error('Error during Puppeteer operation:', error);
@@ -737,29 +737,31 @@ class StepRecorder extends AbstractRecorder {
     }
 }
 
+function createRecorder(args, captions, workDir) {
+    if (args.css3Animations) {
+        const realTimeRenderer = new RealTimeRenderer(args);
+        return new RealTimeRecorder(args, realTimeRenderer);
+    }
+    else {
+        const progressBar = createProgressBar();
+        const stepRenderer = new StepRenderer(args, workDir);
+        return new StepRecorder(args, captions, stepRenderer, progressBar);
+    }
+}
 const cliArgs = parseArgs();
 const captions = parseCaptions(cliArgs.srtInputFile);
-const progressBar = createProgressBar();
 const workDir = new WorkDir(captions, cliArgs);
-const renderer = new Renderer(cliArgs, workDir);
-const stepRecorder = new StepRecorder(cliArgs, captions, renderer, progressBar);
-const videoRenderer = new VideoRenderer(cliArgs);
-const videoRecorder = new VideoRecorder(cliArgs, videoRenderer);
-const previewServer = new PreviewServer(workDir);
 (async () => {
     try {
         const indexHtml = workDir.setup();
         printArgs(cliArgs);
         if (!cliArgs.isPreview) {
-            if (cliArgs.css3Animations) {
-                await videoRecorder.recordCaptionsVideo(indexHtml);
-            }
-            else {
-                await stepRecorder.recordCaptionsVideo(indexHtml);
-            }
+            const recorder = createRecorder(cliArgs, captions, workDir);
+            await recorder.recordCaptionsVideo(indexHtml);
         }
         else {
             console.log('Launching preview server...');
+            const previewServer = new PreviewServer(workDir);
             await previewServer.start();
         }
         console.log('Done!');

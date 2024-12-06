@@ -8,7 +8,7 @@ export abstract class AbstractRecorder {
     protected constructor(protected readonly args: Args) {
     }
 
-    public abstract recordCaptionsVideo(indexHtml: string): void;
+    public abstract recordCaptionsVideo(indexHtml: string): Promise<void>;
 
     protected async launchBrowser(indexHtml: string): Promise<puppeteer.ElementHandle | null> {
         this.browser = await puppeteer.launch({

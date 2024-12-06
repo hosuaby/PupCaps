@@ -1,11 +1,11 @@
 import * as puppeteer from 'puppeteer';
-import {VideoRenderer} from './video-renderer';
+import {RealTimeRenderer} from './real-time-renderer';
 import {Args} from './cli';
 import {AbstractRecorder} from './abstract-recorder';
 
-export class VideoRecorder extends AbstractRecorder {
+export class RealTimeRecorder extends AbstractRecorder {
     constructor(args: Args,
-                private readonly videoRenderer: VideoRenderer) {
+                private readonly videoRenderer: RealTimeRenderer) {
         super(args);
     }
 
