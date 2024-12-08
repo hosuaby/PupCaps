@@ -44,5 +44,6 @@ export default [{
     external: [
         'fs', 'path', 'os', 'stream', 'util',   // Node.js built-in modules
         'commander', 'tmp', 'fluent-ffmpeg', 'pngjs', 'puppeteer', 'cli-progress', 'open', 'http-server', 'get-port',
+        '@ffmpeg-installer/ffmpeg',
     ],
 }];

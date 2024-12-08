@@ -1,5 +1,14 @@
-import ffmpeg from 'fluent-ffmpeg';
+import ffmpeg, { setFfmpegPath } from 'fluent-ffmpeg';
 import {Args} from './cli';
+
+(() => {
+    try {
+        const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+        setFfmpegPath(ffmpegInstaller!.path);
+    } catch (error) {
+        console.warn('Impossible to install FFMpeg. Use system-provided ffmpeg.');
+    }
+})();
 
 export abstract class AbstractRenderer {
     protected constructor(protected readonly args : Args) {

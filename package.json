@@ -36,6 +36,9 @@
     "tmp": "^0.2.3",
     "vue": "^3.5.13"
   },
+  "optionalDependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0"
+  },
   "devDependencies": {
     "@commander-js/extra-typings": "^12.1.0",
     "@rollup/plugin-commonjs": "^28.0.1",

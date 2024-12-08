@@ -132,6 +132,9 @@ var dependencies = {
 	tmp: "^0.2.3",
 	vue: "^3.5.13"
 };
+var optionalDependencies = {
+	"@ffmpeg-installer/ffmpeg": "^1.1.0"
+};
 var devDependencies = {
 	"@commander-js/extra-typings": "^12.1.0",
 	"@rollup/plugin-commonjs": "^28.0.1",
@@ -170,6 +173,7 @@ var packageJson = {
 	homepage: homepage,
 	keywords: keywords,
 	dependencies: dependencies,
+	optionalDependencies: optionalDependencies,
 	devDependencies: devDependencies,
 	scripts: scripts
 };
@@ -444,6 +448,15 @@ class StatsPrinter {
     }
 }
 
+(() => {
+    try {
+        const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+        ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+    }
+    catch (error) {
+        console.warn('Impossible to install FFMpeg. Use system-provided ffmpeg.');
+    }
+})();
 class AbstractRenderer {
     args;
     constructor(args) {

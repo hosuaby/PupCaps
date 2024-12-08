@@ -16,7 +16,9 @@ You will probably also be interested in [Transcriptionist](https://github.com/ho
 
 ## Requirements
 
-You need `node` and `ffmpeg` to be installed on your computer.
+You need `node` to be installed on your computer.
+
+If `ffmpeg` binary is missing on your system, it will be installed automatically.
 
 ## Install
 
