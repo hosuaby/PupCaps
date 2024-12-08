@@ -6,7 +6,7 @@
         wordSpan.textContent = word.rawWord;
         let cssClass = 'word';
         if (word.isHighlighted) {
-            cssClass += ' highlighted';
+            cssClass += ' ' + (word.highlightClass || 'highlighted');
         }
         if (word.isBeforeHighlighted) {
             cssClass += ' before-highlighted';

@@ -6,7 +6,7 @@ function renderWord(word: Word): HTMLSpanElement {
 
     let cssClass = 'word'
     if (word.isHighlighted) {
-        cssClass += ' highlighted';
+        cssClass += ' ' + (word.highlightClass || 'highlighted');
     } if (word.isBeforeHighlighted) {
         cssClass += ' before-highlighted';
     } if (word.isAfterHighlighted) {

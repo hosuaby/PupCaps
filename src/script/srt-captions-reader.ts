@@ -3,7 +3,7 @@ import {Caption, Word} from '../common/caption';
 
 const indexLinePattern = /^\d+$/;
 const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2}.\d{3}) --> (\d{2}:\d{2}:\d{2}.\d{3})$/;
-const highlightedWordPattern = /^\[(.+)]$/;
+const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
 
 export function parseCaptions(srtCaptionsFile: string): Caption[] {
     const captionsSrc = readFileSync(srtCaptionsFile, 'utf-8');
@@ -53,17 +53,24 @@ export function readWords(text: string): Word[] {
         const word = words[i];
         const match = word.match(highlightedWordPattern);
         const rawWord = match ? match[1] : word;
+        const highlightClass = match && match[2] ? match[2] : null;
 
         const isHighlighted = Boolean(match);
         const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
         const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
 
-        res.push({
+        const wordObject: Word = {
             rawWord,
             isHighlighted,
             isBeforeHighlighted,
             isAfterHighlighted,
-        });
+        };
+
+        if (highlightClass) {
+            wordObject.highlightClass = highlightClass;
+        }
+
+        res.push(wordObject);
     }
 
     return res;
@@ -81,10 +88,15 @@ function splitText(text: string): string[] {
 
         if (!isWhitespace) {
             currentWord += char;
-            if (char === '[') {
-                isCurrentHighlighted = true;
-            } else if (char === ']') {
-                isCurrentHighlighted = false;
+            switch (char) {
+                case '[':
+                case '(':
+                    isCurrentHighlighted = true;
+                    break;
+                case ']':
+                case ')':
+                    isCurrentHighlighted = false;
+                    break;
             }
         } else {
             // char is a whitespace

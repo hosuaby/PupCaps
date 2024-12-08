@@ -282,7 +282,7 @@ function createProgressBar() {
 
 const indexLinePattern = /^\d+$/;
 const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2}.\d{3}) --> (\d{2}:\d{2}:\d{2}.\d{3})$/;
-const highlightedWordPattern = /^\[(.+)]$/;
+const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
 function parseCaptions(srtCaptionsFile) {
     const captionsSrc = fs.readFileSync(srtCaptionsFile, 'utf-8');
     return readCaptions(captionsSrc);
@@ -324,15 +324,20 @@ function readWords(text) {
         const word = words[i];
         const match = word.match(highlightedWordPattern);
         const rawWord = match ? match[1] : word;
+        const highlightClass = match && match[2] ? match[2] : null;
         const isHighlighted = Boolean(match);
         const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
         const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
-        res.push({
+        const wordObject = {
             rawWord,
             isHighlighted,
             isBeforeHighlighted,
             isAfterHighlighted,
-        });
+        };
+        if (highlightClass) {
+            wordObject.highlightClass = highlightClass;
+        }
+        res.push(wordObject);
     }
     return res;
 }
@@ -345,11 +350,15 @@ function splitText(text) {
         const isWhitespace = /^\s$/.test(char);
         if (!isWhitespace) {
             currentWord += char;
-            if (char === '[') {
-                isCurrentHighlighted = true;
-            }
-            else if (char === ']') {
-                isCurrentHighlighted = false;
+            switch (char) {
+                case '[':
+                case '(':
+                    isCurrentHighlighted = true;
+                    break;
+                case ']':
+                case ')':
+                    isCurrentHighlighted = false;
+                    break;
             }
         }
         else {

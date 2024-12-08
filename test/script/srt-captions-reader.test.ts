@@ -119,4 +119,36 @@ describe('readCaptions', () => {
             }
         ]);
     });
+
+    it('when highlighted word has CSS class', () => {
+        const words = readWords('La [vie](red) est belle!');
+        expect(words).to.have.lengthOf(4);
+        expect(words).to.deep.equal([
+            {
+                rawWord: 'La',
+                isHighlighted: false,
+                isBeforeHighlighted: true,
+                isAfterHighlighted: false,
+            },
+            {
+                rawWord: 'vie',
+                isHighlighted: true,
+                isBeforeHighlighted: false,
+                isAfterHighlighted: false,
+                highlightClass: 'red',
+            },
+            {
+                rawWord: 'est',
+                isHighlighted: false,
+                isBeforeHighlighted: false,
+                isAfterHighlighted: true,
+            },
+            {
+                rawWord: 'belle!',
+                isHighlighted: false,
+                isBeforeHighlighted: false,
+                isAfterHighlighted: true,
+            }
+        ]);
+    });
 });

@@ -3,6 +3,7 @@ export interface Word {
     isHighlighted: boolean;
     isBeforeHighlighted: boolean;
     isAfterHighlighted: boolean;
+    highlightClass?: string;
 }
 
 export interface Caption {
