@@ -148,6 +148,7 @@ var devDependencies = {
 	"@types/node": "^22.9.1",
 	"@types/pngjs": "^6.0.5",
 	"@types/tmp": "^0.2.6",
+	"browser-env": "^3.3.0",
 	chai: "^5.1.2",
 	mocha: "^10.8.2",
 	rollup: "^4.27.3",
@@ -280,6 +281,18 @@ function createProgressBar() {
     }, cliProgress__namespace.Presets.shades_classic);
 }
 
+function toMillis(timecodes) {
+    const parts = timecodes.split(/[:.]/).map(Number);
+    const hours = parts[0];
+    const minutes = parts[1];
+    const seconds = parts[2];
+    const milliseconds = parts[3];
+    return hours * 3_600_000 // hours to millis
+        + minutes * 60_000 // minutes to millis
+        + seconds * 1000 // second to millis
+        + milliseconds;
+}
+
 const indexLinePattern = /^\d+$/;
 const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2}.\d{3}) --> (\d{2}:\d{2}:\d{2}.\d{3})$/;
 const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
@@ -376,17 +389,6 @@ function splitText(text) {
         words.push(currentWord);
     }
     return words;
-}
-function toMillis(timecodes) {
-    const parts = timecodes.split(/[:.]/).map(Number);
-    const hours = parts[0];
-    const minutes = parts[1];
-    const seconds = parts[2];
-    const milliseconds = parts[3];
-    return hours * 3_600_000 // hours to millis
-        + minutes * 60_000 // minutes to millis
-        + seconds * 1000 // second to millis
-        + milliseconds;
 }
 
 class WorkDir {

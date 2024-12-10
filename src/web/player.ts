@@ -1,26 +1,27 @@
 import {Caption} from '../common/caption';
-import {renderCaption} from './renderer';
+import {CaptionRenderer} from './caption-renderer';
+import {CssProcessor} from './css-processor';
 
 export class Player {
     public onStop = () => {};
 
-    private index = 0;
-    private readonly captionsContainer: Element;
+    private readonly captionsContainer: HTMLDivElement;
     private readonly rendered: HTMLDivElement[] = [];
     private timeoutIds: NodeJS.Timeout[] = [];
-    private displayedCaptionId: number | null = null;
+    private displayedCaptionId = 0;
 
     constructor(private readonly videoElem: HTMLElement,
-                private readonly captions: Caption[]) {
+                private readonly captions: Caption[],
+                private readonly cssProcessor: CssProcessor,
+                renderer: CaptionRenderer) {
         this.captionsContainer = this.videoElem.querySelector('.captions')!;
 
         for (const caption of captions) {
-            this.rendered[caption.index] = renderCaption(caption);
+            this.rendered[caption.index] = renderer.renderCaption(caption);
         }
     }
 
     public play() {
-        this.index = 0;
         this.rendered.forEach(captionElem => captionElem.remove());
 
         if (this.captions.length === 0) {
@@ -52,49 +53,39 @@ export class Player {
     public stop() {
         if (this.displayedCaptionId) {
             this.rendered[this.displayedCaptionId].remove();
-            this.displayedCaptionId = null;
+            this.displayedCaptionId = 0;
         }
 
         while (this.timeoutIds.length) {
             clearTimeout(this.timeoutIds.pop());
         }
 
-        this.index = 0;
         this.onStop();
     }
 
     public prec() {
         if (!this.isBeginning) {
-            const oldCaptionElem = this.rendered[this.index];
-            oldCaptionElem.remove();
-            this.index--;
-
-            if (!this.isBeginning) {
-                const newCaptionElem = this.rendered[this.index]
-                this.captionsContainer.appendChild(newCaptionElem);
+            let precId = this.displayedCaptionId - 1;
+            if (precId) {
+                this.displayCaption(precId);
+            } else {
+                this.hideCaption(this.displayedCaptionId)
             }
         }
     }
 
     public next() {
         if (!this.isEnd) {
-            if (this.index) {
-                const oldCaptionElem = this.rendered[this.index];
-                oldCaptionElem.remove();
-            }
-
-            this.index++;
-            const newCaptionElem = this.rendered[this.index]
-            this.captionsContainer.appendChild(newCaptionElem);
+            this.displayCaption(this.displayedCaptionId + 1);
         }
     }
 
     public get isBeginning(): boolean {
-        return this.index === 0;
+        return this.displayedCaptionId === 0;
     }
 
     public get isEnd(): boolean {
-        return this.index === this.captions.length
+        return this.displayedCaptionId === this.captions.length
     }
 
     private displayCaption(index: number) {
@@ -106,8 +97,20 @@ export class Player {
             this.rendered[this.displayedCaptionId].remove();
         }
 
+        this.dynamicallyStyleContainers(index);
+
         this.captionsContainer.appendChild(this.rendered[index]);
         this.displayedCaptionId = index;
+    }
+
+    private dynamicallyStyleContainers(index: number) {
+        this.videoElem.setAttribute('class', '');
+        this.captionsContainer.setAttribute('class', 'captions');
+
+        const caption = this.captions[index];
+        const captionWords = caption.words.map(word => word.rawWord);
+        this.cssProcessor.applyDynamicClasses(this.videoElem, index, caption.startTimeMs, captionWords);
+        this.cssProcessor.applyDynamicClasses(this.captionsContainer, index, caption.startTimeMs, captionWords);
     }
 
     private hideCaption(index: number) {
@@ -116,6 +119,6 @@ export class Player {
         }
 
         this.rendered[index].remove();
-        this.displayedCaptionId = null;
+        this.displayedCaptionId = 0;
     }
 }
