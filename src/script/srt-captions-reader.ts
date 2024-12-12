@@ -3,7 +3,7 @@ import {Caption, Word} from '../common/caption';
 import {toMillis} from '../common/timecodes';
 
 const indexLinePattern = /^\d+$/;
-const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2}.\d{3}) --> (\d{2}:\d{2}:\d{2}.\d{3})$/;
+const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})$/;
 const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
 
 export function parseCaptions(srtCaptionsFile: string): Caption[] {

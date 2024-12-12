@@ -1,5 +1,5 @@
 export function toMillis(timecodes: string): number {
-    const parts = timecodes.split(/[:.]/).map(Number);
+    const parts = timecodes.split(/[:,]/).map(Number);
 
     const hours = parts[0];
     const minutes = parts[1];

@@ -196,7 +196,7 @@
     script.__file = "src/web/components/player.component.vue";
 
     function toMillis(timecodes) {
-        const parts = timecodes.split(/[:.]/).map(Number);
+        const parts = timecodes.split(/[:,]/).map(Number);
         const hours = parts[0];
         const minutes = parts[1];
         const seconds = parts[2];
