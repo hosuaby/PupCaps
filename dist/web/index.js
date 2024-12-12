@@ -90,7 +90,7 @@
         dynamicallyStyleContainers(index) {
             this.videoElem.setAttribute('class', '');
             this.captionsContainer.setAttribute('class', 'captions');
-            const caption = this.captions[index];
+            const caption = this.captions[index - 1];
             const captionWords = caption.words.map(word => word.rawWord);
             this.cssProcessor.applyDynamicClasses(this.videoElem, index, caption.startTimeMs, captionWords);
             this.cssProcessor.applyDynamicClasses(this.captionsContainer, index, caption.startTimeMs, captionWords);
