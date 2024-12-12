@@ -3,6 +3,7 @@
 </p>
 
 [![npm](https://img.shields.io/npm/v/pupcaps.svg)](http://npm.im/pupcaps) 
+[![CI](https://github.com/hosuaby/PupCaps/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/hosuaby/PupCaps/actions/workflows/ci.yml)
 
 **PupCaps!** is a Node.js script that makes it easy to add captions to your videos with fully customizable styles. 
 Design your captions using CSS, allowing complete control over fonts, colors, positioning, and more. 
