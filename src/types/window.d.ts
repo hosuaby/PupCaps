@@ -1,4 +1,4 @@
-import {Caption} from '../common/caption';
+import {Caption} from '../common/captions';
 import {Player} from '../web/player';
 import {PlayerArgs} from '../common/player-args';
 

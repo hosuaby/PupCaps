@@ -1,17 +1,39 @@
-import {readFileSync} from 'fs';
-import {Caption, Word} from '../common/caption';
-import {toMillis} from '../common/timecodes';
+import {toMillis} from './timecodes';
 
 const indexLinePattern = /^\d+$/;
 const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})$/;
 const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
 
-export function parseCaptions(srtCaptionsFile: string): Caption[] {
-    const captionsSrc = readFileSync(srtCaptionsFile, 'utf-8');
-    return readCaptions(captionsSrc);
+export interface Word {
+    rawWord: string;
+    isHighlighted: boolean;
+    isBeforeHighlighted: boolean;
+    isAfterHighlighted: boolean;
+    highlightClass?: string;
 }
 
-function readCaptions(srtContent: string): Caption[] {
+export interface Caption {
+    index: number;
+    startTimeMs: number;
+    endTimeMs: number;
+    words: Word[];
+}
+
+export function haveSameWords(caption1: Caption, caption2: Caption): boolean {
+    if (caption1.words.length != caption2.words.length) {
+        return false;
+    }
+
+    for (let i =0; i < caption1.words.length; i++) {
+        if (caption1.words[i].rawWord != caption2.words[i].rawWord) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+export function readCaptions(srtContent: string): Caption[] {
     const lines = srtContent.split('\n');
     const captions: Caption[] = [];
 
@@ -77,7 +99,7 @@ export function readWords(text: string): Word[] {
     return res;
 }
 
-function splitText(text: string): string[] {
+export function splitText(text: string): string[] {
     const words: string[] = [];
 
     let currentWord = '';
@@ -86,18 +108,28 @@ function splitText(text: string): string[] {
     for (let i = 0; i < text.length; i++) {
         const char = text[i];
         const isWhitespace = /^\s$/.test(char);
+        const isPunctuation = /[,.!?]/.test(char);
 
         if (!isWhitespace) {
-            currentWord += char;
-            switch (char) {
-                case '[':
-                case '(':
-                    isCurrentHighlighted = true;
-                    break;
-                case ']':
-                case ')':
-                    isCurrentHighlighted = false;
-                    break;
+            if (!isPunctuation) {
+                currentWord += char;
+                switch (char) {
+                    case '[':
+                    case '(':
+                        isCurrentHighlighted = true;
+                        break;
+                    case ']':
+                    case ')':
+                        isCurrentHighlighted = false;
+                        break;
+                }
+            } else {
+                if (currentWord) {
+                    currentWord += char;
+                } else {
+                    // Attach punctuation mark to the previous word
+                    words[words.length - 1] += ' ' + char;
+                }
             }
         } else {
             // char is a whitespace

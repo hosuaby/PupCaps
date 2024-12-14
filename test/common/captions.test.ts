@@ -1,5 +1,61 @@
 import {expect} from 'chai';
-import {readWords} from '../../src/script/srt-captions-reader';
+import {Caption, haveSameWords, readWords, splitText} from '../../src/common/captions';
+
+it('haveSameWords', () => {
+    // Given
+    const cue1 = 'vous [avez] lancé en septembre';
+    const cue2 = 'vous avez lancé [en] septembre';
+    const cue3 = 'que [vous] recrutez';
+
+    const caption1: Caption = {
+        index: 1,
+        startTimeMs: 0,
+        endTimeMs: 0,
+        words: readWords(cue1),
+    };
+    const caption2: Caption = {
+        index: 2,
+        startTimeMs: 0,
+        endTimeMs: 0,
+        words: readWords(cue2),
+    };
+    const caption3: Caption = {
+        index: 2,
+        startTimeMs: 0,
+        endTimeMs: 0,
+        words: readWords(cue3),
+    };
+
+    // When
+    const sameWords1 = haveSameWords(caption1, caption2);
+    const sameWords2 = haveSameWords(caption1, caption3);
+
+    // Then
+    expect(sameWords1).to.be.true;
+    expect(sameWords2).to.be.false;
+});
+
+it('splitText', () => {
+    // Given
+    const text1 = 'votre [projet] Basalt !';
+    const text2 = 'votre projet [Basalt !]';
+
+    // When
+    const tokens1 = splitText(text1);
+    const tokens2 = splitText(text2);
+
+    // Then
+    expect(tokens1).to.be.deep.equals([
+        'votre',
+        '[projet]',
+        'Basalt !',
+    ]);
+    expect(tokens2).to.be.deep.equals([
+        'votre',
+        'projet',
+        '[Basalt !]',
+    ]);
+});
 
 describe('readCaptions', () => {
     it('when no highlighted', () => {

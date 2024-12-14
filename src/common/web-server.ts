@@ -1,19 +1,18 @@
 import {createServer} from 'http-server';
-import {WorkDir} from './work-dir';
 
-export class PreviewServer {
-    constructor(private readonly wordDir: WorkDir) {
+export class WebServer {
+    constructor(private readonly rootDir: string) {
     }
 
-    public async start() {
+    public async start(relativePath = '') {
         return new Promise<void>(async (resolve, reject) => {
             try {
-                const server = createServer({ root: this.wordDir.rootDir });
-                const port = await PreviewServer.getFreePort();
+                const server = createServer({ root: this.rootDir });
+                const port = await WebServer.getFreePort();
 
                 server.listen(port, async () => {
                     try {
-                        const childProcess = await PreviewServer.openUrl(`http://127.0.0.1:${port}`);
+                        const childProcess = await WebServer.openUrl(`http://127.0.0.1:${port}${relativePath}`);
 
                         childProcess.on('close', () => {
                             server.close(() => {

@@ -1,15 +1,15 @@
 'use strict';
 
+var fs = require('fs');
 var require$$0 = require('commander');
 var path = require('path');
 var cliProgress = require('cli-progress');
-var fs = require('fs');
 var tmp = require('tmp');
 var pngjs = require('pngjs');
 var ffmpeg = require('fluent-ffmpeg');
-var httpServer = require('http-server');
 var puppeteer = require('puppeteer');
 var stream = require('stream');
+var httpServer = require('http-server');
 
 function _interopNamespaceDefault(e) {
 	var n = Object.create(null);
@@ -123,6 +123,7 @@ var dependencies = {
 	bulma: "^1.0.2",
 	"cli-progress": "^3.12.0",
 	commander: "^12.1.0",
+	"file-saver": "^2.0.5",
 	"fluent-ffmpeg": "^2.1.3",
 	"get-port": "^7.1.0",
 	"http-server": "^14.1.1",
@@ -142,6 +143,7 @@ var devDependencies = {
 	"@rollup/plugin-node-resolve": "^15.3.0",
 	"@types/chai": "^5.0.1",
 	"@types/cli-progress": "^3.11.6",
+	"@types/file-saver": "^2.0.7",
 	"@types/fluent-ffmpeg": "^2.1.27",
 	"@types/http-server": "^0.12.4",
 	"@types/mocha": "^10.0.10",
@@ -152,6 +154,7 @@ var devDependencies = {
 	chai: "^5.1.2",
 	mocha: "^10.8.2",
 	rollup: "^4.27.3",
+	"rollup-plugin-copy": "^3.5.0",
 	"rollup-plugin-typescript2": "^0.36.0",
 	"rollup-plugin-vue": "^6.0.0",
 	tsx: "^4.19.2",
@@ -279,116 +282,6 @@ function createProgressBar() {
         barIncompleteChar: '\u2591',
         hideCursor: true,
     }, cliProgress__namespace.Presets.shades_classic);
-}
-
-function toMillis(timecodes) {
-    const parts = timecodes.split(/[:,]/).map(Number);
-    const hours = parts[0];
-    const minutes = parts[1];
-    const seconds = parts[2];
-    const milliseconds = parts[3];
-    return hours * 3_600_000 // hours to millis
-        + minutes * 60_000 // minutes to millis
-        + seconds * 1000 // second to millis
-        + milliseconds;
-}
-
-const indexLinePattern = /^\d+$/;
-const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})$/;
-const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
-function parseCaptions(srtCaptionsFile) {
-    const captionsSrc = fs.readFileSync(srtCaptionsFile, 'utf-8');
-    return readCaptions(captionsSrc);
-}
-function readCaptions(srtContent) {
-    const lines = srtContent.split('\n');
-    const captions = [];
-    let index = 0;
-    let timecodesStart = null;
-    let timecodesEnd = null;
-    for (const line of lines) {
-        let match;
-        if ((match = line.match(indexLinePattern))) {
-            index = Number(line);
-        }
-        else if ((match = line.match(timecodesLinePattern))) {
-            timecodesStart = match[1];
-            timecodesEnd = match[2];
-        }
-        else if (line.length) {
-            const start = toMillis(timecodesStart);
-            const end = toMillis(timecodesEnd);
-            const words = readWords(line);
-            captions.push({
-                index,
-                words,
-                startTimeMs: start,
-                endTimeMs: end,
-            });
-        }
-    }
-    return captions;
-}
-function readWords(text) {
-    const words = splitText(text);
-    const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
-    const res = [];
-    for (let i = 0; i < words.length; i++) {
-        const word = words[i];
-        const match = word.match(highlightedWordPattern);
-        const rawWord = match ? match[1] : word;
-        const highlightClass = match && match[2] ? match[2] : null;
-        const isHighlighted = Boolean(match);
-        const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
-        const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
-        const wordObject = {
-            rawWord,
-            isHighlighted,
-            isBeforeHighlighted,
-            isAfterHighlighted,
-        };
-        if (highlightClass) {
-            wordObject.highlightClass = highlightClass;
-        }
-        res.push(wordObject);
-    }
-    return res;
-}
-function splitText(text) {
-    const words = [];
-    let currentWord = '';
-    let isCurrentHighlighted = false;
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const isWhitespace = /^\s$/.test(char);
-        if (!isWhitespace) {
-            currentWord += char;
-            switch (char) {
-                case '[':
-                case '(':
-                    isCurrentHighlighted = true;
-                    break;
-                case ']':
-                case ')':
-                    isCurrentHighlighted = false;
-                    break;
-            }
-        }
-        else {
-            // char is a whitespace
-            if (isCurrentHighlighted) {
-                currentWord += char;
-            }
-            else if (currentWord) {
-                words.push(currentWord);
-                currentWord = '';
-            }
-        }
-    }
-    if (currentWord) {
-        words.push(currentWord);
-    }
-    return words;
 }
 
 class WorkDir {
@@ -540,45 +433,6 @@ class StepRenderer extends AbstractRenderer {
             })
                 .run();
         });
-    }
-}
-
-class PreviewServer {
-    wordDir;
-    constructor(wordDir) {
-        this.wordDir = wordDir;
-    }
-    async start() {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const server = httpServer.createServer({ root: this.wordDir.rootDir });
-                const port = await PreviewServer.getFreePort();
-                server.listen(port, async () => {
-                    try {
-                        const childProcess = await PreviewServer.openUrl(`http://127.0.0.1:${port}`);
-                        childProcess.on('close', () => {
-                            server.close(() => {
-                                resolve();
-                            });
-                        });
-                    }
-                    catch (error) {
-                        reject(error);
-                    }
-                });
-            }
-            catch (error) {
-                reject(error);
-            }
-        });
-    }
-    static async getFreePort() {
-        const { default: getPort } = await import('get-port');
-        return getPort();
-    }
-    static async openUrl(url) {
-        const { default: open } = await import('open');
-        return open(url, { wait: true });
     }
 }
 
@@ -765,6 +619,167 @@ class StepRecorder extends AbstractRecorder {
     }
 }
 
+function toMillis(timecodes) {
+    const parts = timecodes.split(/[:,]/).map(Number);
+    const hours = parts[0];
+    const minutes = parts[1];
+    const seconds = parts[2];
+    const milliseconds = parts[3];
+    return hours * 3_600_000 // hours to millis
+        + minutes * 60_000 // minutes to millis
+        + seconds * 1000 // second to millis
+        + milliseconds;
+}
+
+const indexLinePattern = /^\d+$/;
+const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})$/;
+const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
+function readCaptions(srtContent) {
+    const lines = srtContent.split('\n');
+    const captions = [];
+    let index = 0;
+    let timecodesStart = null;
+    let timecodesEnd = null;
+    for (const line of lines) {
+        let match;
+        if ((match = line.match(indexLinePattern))) {
+            index = Number(line);
+        }
+        else if ((match = line.match(timecodesLinePattern))) {
+            timecodesStart = match[1];
+            timecodesEnd = match[2];
+        }
+        else if (line.length) {
+            const start = toMillis(timecodesStart);
+            const end = toMillis(timecodesEnd);
+            const words = readWords(line);
+            captions.push({
+                index,
+                words,
+                startTimeMs: start,
+                endTimeMs: end,
+            });
+        }
+    }
+    return captions;
+}
+function readWords(text) {
+    const words = splitText(text);
+    const highlightedIndex = words.findIndex(word => word.match(highlightedWordPattern));
+    const res = [];
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const match = word.match(highlightedWordPattern);
+        const rawWord = match ? match[1] : word;
+        const highlightClass = match && match[2] ? match[2] : null;
+        const isHighlighted = Boolean(match);
+        const isBeforeHighlighted = Boolean(~highlightedIndex && !isHighlighted && i < highlightedIndex);
+        const isAfterHighlighted = Boolean(~highlightedIndex && !isHighlighted && i > highlightedIndex);
+        const wordObject = {
+            rawWord,
+            isHighlighted,
+            isBeforeHighlighted,
+            isAfterHighlighted,
+        };
+        if (highlightClass) {
+            wordObject.highlightClass = highlightClass;
+        }
+        res.push(wordObject);
+    }
+    return res;
+}
+function splitText(text) {
+    const words = [];
+    let currentWord = '';
+    let isCurrentHighlighted = false;
+    for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const isWhitespace = /^\s$/.test(char);
+        const isPunctuation = /[,.!?]/.test(char);
+        if (!isWhitespace) {
+            if (!isPunctuation) {
+                currentWord += char;
+                switch (char) {
+                    case '[':
+                    case '(':
+                        isCurrentHighlighted = true;
+                        break;
+                    case ']':
+                    case ')':
+                        isCurrentHighlighted = false;
+                        break;
+                }
+            }
+            else {
+                if (currentWord) {
+                    currentWord += char;
+                }
+                else {
+                    // Attach punctuation mark to the previous word
+                    words[words.length - 1] += ' ' + char;
+                }
+            }
+        }
+        else {
+            // Is a whitespace
+            if (isCurrentHighlighted) {
+                currentWord += char;
+            }
+            else if (currentWord) {
+                words.push(currentWord);
+                currentWord = '';
+            }
+        }
+    }
+    if (currentWord) {
+        words.push(currentWord);
+    }
+    return words;
+}
+
+class WebServer {
+    rootDir;
+    constructor(rootDir) {
+        this.rootDir = rootDir;
+    }
+    async start(relativePath = '') {
+        return new Promise(async (resolve, reject) => {
+            try {
+                const server = httpServer.createServer({ root: this.rootDir });
+                const port = await WebServer.getFreePort();
+                server.listen(port, async () => {
+                    try {
+                        const childProcess = await WebServer.openUrl(`http://127.0.0.1:${port}${relativePath}`);
+                        childProcess.on('close', () => {
+                            server.close(() => {
+                                resolve();
+                            });
+                        });
+                    }
+                    catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+            catch (error) {
+                reject(error);
+            }
+        });
+    }
+    static async getFreePort() {
+        const { default: getPort } = await import('get-port');
+        return getPort();
+    }
+    static async openUrl(url) {
+        const { default: open } = await import('open');
+        return open(url, { wait: true });
+    }
+}
+
+function parseCaptions(srtCaptionsFile) {
+    const captionsSrc = fs.readFileSync(srtCaptionsFile, 'utf-8');
+    return readCaptions(captionsSrc);
+}
 function createRecorder(args, captions, workDir) {
     if (args.css3Animations) {
         const realTimeRenderer = new RealTimeRenderer(args);
@@ -789,7 +804,7 @@ const workDir = new WorkDir(captions, cliArgs);
         }
         else {
             console.log('Launching preview server...');
-            const previewServer = new PreviewServer(workDir);
+            const previewServer = new WebServer(workDir.rootDir);
             await previewServer.start();
         }
         console.log('Done!');

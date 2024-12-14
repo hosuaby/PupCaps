@@ -1,4 +1,4 @@
-import {Caption, Word} from '../common/caption';
+import {Caption, Word} from '../common/captions';
 import {CssProcessor} from './css-processor';
 
 export class CaptionRenderer {

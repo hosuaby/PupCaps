@@ -1,4 +1,4 @@
-import {Caption} from '../common/caption';
+import {Caption} from '../common/captions';
 import {CaptionRenderer} from './caption-renderer';
 import {CssProcessor} from './css-processor';
 

@@ -1,7 +1,7 @@
 import * as puppeteer from 'puppeteer';
 import * as cliProgress from 'cli-progress';
 import {PNG, PNGWithMetadata} from 'pngjs';
-import {Caption} from '../common/caption';
+import {Caption} from '../common/captions';
 import {StepRenderer} from './step-renderer';
 import {Args} from './cli';
 import {AbstractRecorder} from './abstract-recorder';

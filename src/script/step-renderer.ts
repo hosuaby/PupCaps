@@ -3,7 +3,7 @@ import {PNG, PNGWithMetadata} from 'pngjs';
 import * as path from 'path';
 import {appendFileSync, writeFileSync} from 'fs';
 import {WorkDir} from './work-dir';
-import {Caption} from '../common/caption';
+import {Caption} from '../common/captions';
 import {StatsPrinter} from './stats-printer';
 import {AbstractRenderer} from './abstract-renderer';
 

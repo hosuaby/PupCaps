@@ -1,7 +1,7 @@
 import * as tmp from 'tmp';
 import * as path from 'path';
 import {writeFileSync, symlinkSync, rmSync, mkdirSync} from 'fs';
-import {Caption} from '../common/caption';
+import {Caption} from '../common/captions';
 import {Args} from './cli';
 import {indexHtml, indexJs, nodeModules} from './assets';
 import {PlayerArgs} from '../common/player-args';

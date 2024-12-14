@@ -1,13 +1,18 @@
+import {readFileSync} from 'fs';
 import {Args, createProgressBar, parseArgs, printArgs} from './cli';
-import {parseCaptions} from './srt-captions-reader';
 import {WorkDir} from './work-dir';
 import {StepRenderer} from './step-renderer';
-import {PreviewServer} from './preview-server';
 import {RealTimeRecorder} from './real-time-recorder';
 import {RealTimeRenderer} from './real-time-renderer';
 import {StepRecorder} from './step-recorder';
 import {AbstractRecorder} from './abstract-recorder';
-import {Caption} from '../common/caption';
+import {Caption, readCaptions} from '../common/captions';
+import {WebServer} from '../common/web-server';
+
+function parseCaptions(srtCaptionsFile: string): Caption[] {
+    const captionsSrc = readFileSync(srtCaptionsFile, 'utf-8');
+    return readCaptions(captionsSrc);
+}
 
 function createRecorder(args: Args, captions: Caption[], workDir: WorkDir): AbstractRecorder {
     if (args.css3Animations) {
@@ -34,7 +39,7 @@ const workDir = new WorkDir(captions, cliArgs);
             await recorder.recordCaptionsVideo(indexHtml);
         } else {
             console.log('Launching preview server...');
-            const previewServer = new PreviewServer(workDir);
+            const previewServer = new WebServer(workDir.rootDir);
             await previewServer.start();
         }
         console.log('Done!');
