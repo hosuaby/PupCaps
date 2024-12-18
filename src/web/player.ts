@@ -1,4 +1,4 @@
-import {Caption} from '../common/captions';
+import {Caption, haveSameWords} from '../common/captions';
 import {CaptionRenderer} from './caption-renderer';
 import {CssProcessor} from './css-processor';
 
@@ -16,8 +16,11 @@ export class Player {
                 renderer: CaptionRenderer) {
         this.captionsContainer = this.videoElem.querySelector('.captions')!;
 
-        for (const caption of captions) {
-            this.rendered[caption.index] = renderer.renderCaption(caption);
+        for (let i = 0; i < captions.length; i++) {
+            const caption = captions[i];
+            this.rendered[caption.index] = i > 0 && haveSameWords(caption, captions[i - 1])
+                ? this.rendered[caption.index - 1]
+                : renderer.renderCaption(caption);
         }
     }
 
@@ -33,20 +36,24 @@ export class Player {
             const displayTimeoutId = setTimeout(() => {
                 this.displayCaption(caption.index);
             }, caption.startTimeMs);
+            this.timeoutIds.push(displayTimeoutId);
 
-            let hideTimeoutId: NodeJS.Timeout;
             if (i < this.captions.length - 1) {
-                hideTimeoutId = setTimeout(() => {
-                    this.hideCaption(caption.index);
-                }, caption.endTimeMs);
+                const nextCaption = this.captions[i + 1];
+
+                if (!haveSameWords(caption, nextCaption)) {
+                    const hideTimeoutId = setTimeout(() => {
+                        this.hideCaption(caption.index);
+                    }, caption.endTimeMs);
+                    this.timeoutIds.push(hideTimeoutId);
+                }
             } else {
-                hideTimeoutId = setTimeout(() => {
+                const hideTimeoutId = setTimeout(() => {
                     this.hideCaption(caption.index);
                     this.stop();
                 }, caption.endTimeMs);
+                this.timeoutIds.push(hideTimeoutId);
             }
-
-            this.timeoutIds.push(displayTimeoutId, hideTimeoutId);
         }
     }
 
@@ -94,12 +101,40 @@ export class Player {
         }
 
         if (this.displayedCaptionId) {
-            this.rendered[this.displayedCaptionId].remove();
+            const displayedCaption = this.captions[this.displayedCaptionId - 1];
+            const nextCaption = this.captions[index - 1];
+
+            if (haveSameWords(displayedCaption, nextCaption)) {
+                const renderedCaption = this.rendered[this.displayedCaptionId];
+
+                const captionWords = nextCaption.words.map(word => word.rawWord);
+                this.cssProcessor.applyDynamicClasses(renderedCaption, index, nextCaption.startTimeMs, captionWords);
+
+                const renderedWords = renderedCaption.querySelectorAll('.word');
+                for (let i = 0; i < renderedWords.length; i++) {
+                    const word = nextCaption.words[i];
+                    const renderedWord = renderedWords[i] as HTMLElement;
+
+                    const cssClasses = CaptionRenderer.wordSpanClasses(word);
+                    const existingClasses = new Set([...renderedWord.classList.values()]);
+
+                    const classesToRemove = existingClasses.difference(cssClasses);
+                    const classesToAdd = cssClasses.difference(existingClasses);
+
+                    renderedWord.classList.remove(...classesToRemove);
+                    renderedWord.classList.add(...classesToAdd);
+
+                    this.cssProcessor.applyDynamicClasses(renderedWord, index, nextCaption.startTimeMs, [ word.rawWord ]);
+                }
+            } else {
+                this.rendered[this.displayedCaptionId].remove();
+                this.captionsContainer.appendChild(this.rendered[index]);
+            }
+        } else {
+            this.captionsContainer.appendChild(this.rendered[index]);
         }
 
         this.dynamicallyStyleContainers(index);
-
-        this.captionsContainer.appendChild(this.rendered[index]);
         this.displayedCaptionId = index;
     }
 

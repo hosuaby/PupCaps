@@ -1,6 +1,67 @@
 (function (vue) {
     'use strict';
 
+    function toMillis(timecodes) {
+        const parts = timecodes.split(/[:,]/).map(Number);
+        const hours = parts[0];
+        const minutes = parts[1];
+        const seconds = parts[2];
+        const milliseconds = parts[3];
+        return hours * 3_600_000 // hours to millis
+            + minutes * 60_000 // minutes to millis
+            + seconds * 1000 // second to millis
+            + milliseconds;
+    }
+
+    function haveSameWords(caption1, caption2) {
+        if (caption1.words.length != caption2.words.length) {
+            return false;
+        }
+        for (let i = 0; i < caption1.words.length; i++) {
+            if (caption1.words[i].rawWord != caption2.words[i].rawWord) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    class CaptionRenderer {
+        cssProcessor;
+        constructor(cssProcessor) {
+            this.cssProcessor = cssProcessor;
+        }
+        renderCaption(caption) {
+            const captionDiv = document.createElement('div');
+            captionDiv.setAttribute('id', `caption_${caption.index}`);
+            captionDiv.setAttribute('class', 'caption');
+            caption.words
+                .map(word => this.renderWord(word, caption))
+                .forEach(spanElem => captionDiv.appendChild(spanElem));
+            const captionWords = caption.words.map(word => word.rawWord);
+            return this.cssProcessor.applyDynamicClasses(captionDiv, caption.index, caption.startTimeMs, captionWords);
+        }
+        renderWord(word, caption) {
+            const cssClasses = CaptionRenderer.wordSpanClasses(word);
+            const wordSpan = document.createElement('span');
+            wordSpan.textContent = word.rawWord;
+            wordSpan.classList.add(...cssClasses);
+            return this.cssProcessor.applyDynamicClasses(wordSpan, caption.index, caption.startTimeMs, [word.rawWord]);
+        }
+        static wordSpanClasses(word) {
+            const cssClasses = new Set(['word']);
+            if (word.isHighlighted) {
+                cssClasses.add(word.highlightClass || 'highlighted');
+            }
+            if (word.isBeforeHighlighted) {
+                cssClasses.add('before-highlighted');
+            }
+            if (word.isAfterHighlighted) {
+                cssClasses.add('after-highlighted');
+            }
+            return cssClasses;
+        }
+    }
+
     class Player {
         videoElem;
         captions;
@@ -15,8 +76,11 @@
             this.captions = captions;
             this.cssProcessor = cssProcessor;
             this.captionsContainer = this.videoElem.querySelector('.captions');
-            for (const caption of captions) {
-                this.rendered[caption.index] = renderer.renderCaption(caption);
+            for (let i = 0; i < captions.length; i++) {
+                const caption = captions[i];
+                this.rendered[caption.index] = i > 0 && haveSameWords(caption, captions[i - 1])
+                    ? this.rendered[caption.index - 1]
+                    : renderer.renderCaption(caption);
             }
         }
         play() {
@@ -29,19 +93,23 @@
                 const displayTimeoutId = setTimeout(() => {
                     this.displayCaption(caption.index);
                 }, caption.startTimeMs);
-                let hideTimeoutId;
+                this.timeoutIds.push(displayTimeoutId);
                 if (i < this.captions.length - 1) {
-                    hideTimeoutId = setTimeout(() => {
-                        this.hideCaption(caption.index);
-                    }, caption.endTimeMs);
+                    const nextCaption = this.captions[i + 1];
+                    if (!haveSameWords(caption, nextCaption)) {
+                        const hideTimeoutId = setTimeout(() => {
+                            this.hideCaption(caption.index);
+                        }, caption.endTimeMs);
+                        this.timeoutIds.push(hideTimeoutId);
+                    }
                 }
                 else {
-                    hideTimeoutId = setTimeout(() => {
+                    const hideTimeoutId = setTimeout(() => {
                         this.hideCaption(caption.index);
                         this.stop();
                     }, caption.endTimeMs);
+                    this.timeoutIds.push(hideTimeoutId);
                 }
-                this.timeoutIds.push(displayTimeoutId, hideTimeoutId);
             }
         }
         stop() {
@@ -81,10 +149,34 @@
                 return; // Displayed already, do nothing
             }
             if (this.displayedCaptionId) {
-                this.rendered[this.displayedCaptionId].remove();
+                const displayedCaption = this.captions[this.displayedCaptionId - 1];
+                const nextCaption = this.captions[index - 1];
+                if (haveSameWords(displayedCaption, nextCaption)) {
+                    const renderedCaption = this.rendered[this.displayedCaptionId];
+                    const captionWords = nextCaption.words.map(word => word.rawWord);
+                    this.cssProcessor.applyDynamicClasses(renderedCaption, index, nextCaption.startTimeMs, captionWords);
+                    const renderedWords = renderedCaption.querySelectorAll('.word');
+                    for (let i = 0; i < renderedWords.length; i++) {
+                        const word = nextCaption.words[i];
+                        const renderedWord = renderedWords[i];
+                        const cssClasses = CaptionRenderer.wordSpanClasses(word);
+                        const existingClasses = new Set([...renderedWord.classList.values()]);
+                        const classesToRemove = existingClasses.difference(cssClasses);
+                        const classesToAdd = cssClasses.difference(existingClasses);
+                        renderedWord.classList.remove(...classesToRemove);
+                        renderedWord.classList.add(...classesToAdd);
+                        this.cssProcessor.applyDynamicClasses(renderedWord, index, nextCaption.startTimeMs, [word.rawWord]);
+                    }
+                }
+                else {
+                    this.rendered[this.displayedCaptionId].remove();
+                    this.captionsContainer.appendChild(this.rendered[index]);
+                }
+            }
+            else {
+                this.captionsContainer.appendChild(this.rendered[index]);
             }
             this.dynamicallyStyleContainers(index);
-            this.captionsContainer.appendChild(this.rendered[index]);
             this.displayedCaptionId = index;
         }
         dynamicallyStyleContainers(index) {
@@ -195,18 +287,6 @@
 
     script.__file = "src/web/components/player.component.vue";
 
-    function toMillis(timecodes) {
-        const parts = timecodes.split(/[:,]/).map(Number);
-        const hours = parts[0];
-        const minutes = parts[1];
-        const seconds = parts[2];
-        const milliseconds = parts[3];
-        return hours * 3_600_000 // hours to millis
-            + minutes * 60_000 // minutes to millis
-            + seconds * 1000 // second to millis
-            + milliseconds;
-    }
-
     function normalizeTimecode(timecode) {
         const [hh, mm, ss, ms] = timecode.split(/[^\d]+/);
         return `${hh}:${mm}:${ss}.${ms}`;
@@ -281,6 +361,7 @@
         }
     }
 
+    const dynamicCssClassPrefix = 'pup-';
     const dynamicCssClassPattern = /^\.pup-(\w+)((?:-[^-]+)+)$/;
     class CssProcessor {
         dynamicCssRules = [];
@@ -312,15 +393,23 @@
         }
         applyDynamicClasses(target, captionIndex, timeMs, words) {
             const dynamicCssClasses = this.dynamicCssClasses(target, captionIndex, timeMs, words);
-            let cssClass = target.getAttribute('class') || '';
-            dynamicCssClasses.forEach(dynamicClass => cssClass += ' ' + dynamicClass);
-            target.setAttribute('class', cssClass);
+            const existingDynamicClasses = CssProcessor.getDynamicCssClassesFromElem(target);
+            const classesToRemove = existingDynamicClasses.difference(dynamicCssClasses);
+            const classesToAdd = dynamicCssClasses.difference(classesToRemove);
+            target.classList.remove(...classesToRemove);
+            target.classList.add(...classesToAdd);
             return target;
         }
         dynamicCssClasses(target, captionIndex, timeMs, words) {
-            return this.dynamicCssRules
+            const cssClasses = this.dynamicCssRules
                 .filter(rule => rule.isApplied(target, captionIndex, timeMs, words))
                 .map(rule => rule.appliedCssClass);
+            return new Set(cssClasses);
+        }
+        static getDynamicCssClassesFromElem(elem) {
+            const dynamicCssClasses = [...elem.classList.values()]
+                .filter(cssClass => cssClass.startsWith(dynamicCssClassPrefix));
+            return new Set(dynamicCssClasses);
         }
         static parseFilter(dynamicCssClass) {
             const match = dynamicCssClass.match(dynamicCssClassPattern);
@@ -364,39 +453,6 @@
                 selectors.push(currentToken);
             }
             return selectors;
-        }
-    }
-
-    class CaptionRenderer {
-        cssProcessor;
-        constructor(cssProcessor) {
-            this.cssProcessor = cssProcessor;
-        }
-        renderCaption(caption) {
-            const captionDiv = document.createElement('div');
-            captionDiv.setAttribute('id', `caption_${caption.index}`);
-            captionDiv.setAttribute('class', 'caption');
-            caption.words
-                .map(word => this.renderWord(word, caption))
-                .forEach(spanElem => captionDiv.appendChild(spanElem));
-            const captionWords = caption.words.map(word => word.rawWord);
-            return this.cssProcessor.applyDynamicClasses(captionDiv, caption.index, caption.startTimeMs, captionWords);
-        }
-        renderWord(word, caption) {
-            const wordSpan = document.createElement('span');
-            wordSpan.textContent = word.rawWord;
-            let cssClass = 'word';
-            if (word.isHighlighted) {
-                cssClass += ' ' + (word.highlightClass || 'highlighted');
-            }
-            if (word.isBeforeHighlighted) {
-                cssClass += ' before-highlighted';
-            }
-            if (word.isAfterHighlighted) {
-                cssClass += ' after-highlighted';
-            }
-            wordSpan.setAttribute('class', cssClass);
-            return this.cssProcessor.applyDynamicClasses(wordSpan, caption.index, caption.startTimeMs, [word.rawWord]);
         }
     }
 

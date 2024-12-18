@@ -1,5 +1,6 @@
 import {AbstractDynamicCssRule, createDynamicCssRule, Filter, FilterType} from '../script/dynamic-css-rules';
 
+const dynamicCssClassPrefix = 'pup-';
 const dynamicCssClassPattern = /^\.pup-(\w+)((?:-[^-]+)+)$/;
 
 export class CssProcessor {
@@ -38,16 +39,28 @@ export class CssProcessor {
 
     public applyDynamicClasses<T extends HTMLElement>(target: T, captionIndex: number, timeMs: number, words: string[]): T {
         const dynamicCssClasses = this.dynamicCssClasses(target, captionIndex, timeMs, words);
-        let cssClass = target.getAttribute('class') || '';
-        dynamicCssClasses.forEach(dynamicClass => cssClass += ' ' + dynamicClass);
-        target.setAttribute('class', cssClass);
+        const existingDynamicClasses = CssProcessor.getDynamicCssClassesFromElem(target);
+
+        const classesToRemove = existingDynamicClasses.difference(dynamicCssClasses);
+        const classesToAdd = dynamicCssClasses.difference(classesToRemove);
+
+        target.classList.remove(...classesToRemove);
+        target.classList.add(...classesToAdd);
+
         return target;
     }
 
-    private dynamicCssClasses(target: HTMLElement, captionIndex: number, timeMs: number, words: string[]): string[] {
-        return this.dynamicCssRules
+    private dynamicCssClasses(target: HTMLElement, captionIndex: number, timeMs: number, words: string[]): Set<string> {
+        const cssClasses = this.dynamicCssRules
             .filter(rule => rule.isApplied(target, captionIndex, timeMs, words))
             .map(rule => rule.appliedCssClass);
+        return new Set(cssClasses);
+    }
+
+    public static getDynamicCssClassesFromElem(elem: HTMLElement): Set<string> {
+        const dynamicCssClasses = [...elem.classList.values()]
+            .filter(cssClass => cssClass.startsWith(dynamicCssClassPrefix));
+        return new Set(dynamicCssClasses);
     }
 
     static parseFilter(dynamicCssClass: string): Filter {

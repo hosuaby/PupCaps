@@ -19,20 +19,25 @@ export class CaptionRenderer {
     }
 
     private renderWord(word: Word, caption: Caption): HTMLSpanElement {
+        const cssClasses = CaptionRenderer.wordSpanClasses(word);
         const wordSpan = document.createElement('span');
         wordSpan.textContent = word.rawWord;
-
-        let cssClass = 'word'
-        if (word.isHighlighted) {
-            cssClass += ' ' + (word.highlightClass || 'highlighted');
-        } if (word.isBeforeHighlighted) {
-            cssClass += ' before-highlighted';
-        } if (word.isAfterHighlighted) {
-            cssClass += ' after-highlighted';
-        }
-
-        wordSpan.setAttribute('class', cssClass);
+        wordSpan.classList.add(...cssClasses);
 
         return this.cssProcessor.applyDynamicClasses(wordSpan, caption.index, caption.startTimeMs, [ word.rawWord ]);
+    }
+
+    public static wordSpanClasses(word: Word): Set<string> {
+        const cssClasses = new Set([ 'word' ]);
+
+        if (word.isHighlighted) {
+            cssClasses.add(word.highlightClass || 'highlighted');
+        } if (word.isBeforeHighlighted) {
+            cssClasses.add('before-highlighted');
+        } if (word.isAfterHighlighted) {
+            cssClasses.add('after-highlighted');
+        }
+
+        return cssClasses;
     }
 }

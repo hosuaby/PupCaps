@@ -218,7 +218,7 @@
 	            }
 	        }
 	        else {
-	            // Is a whitespace
+	            // char is a whitespace
 	            if (isCurrentHighlighted) {
 	                currentWord += char;
 	            }
