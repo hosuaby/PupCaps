@@ -273,6 +273,10 @@
 	        this.indexEnd--;
 	        return this.words.pop();
 	    }
+	    shiftIndices(shift) {
+	        this.indexStart += shift;
+	        this.indexEnd += shift;
+	    }
 	    get id() {
 	        return `${this.indexStart}-${this.indexEnd}`;
 	    }
@@ -336,6 +340,22 @@
 	        if (karaokeGroup.isEmpty) {
 	            this.groups.splice(groupId, 1);
 	        }
+	    }
+	    deleteKaraokeGroup(karaokeGroupId) {
+	        const groups = [];
+	        let shift = 0;
+	        for (const group of this.groups) {
+	            if (group.id === karaokeGroupId) {
+	                shift = group.indexStart - group.indexEnd - 1;
+	            }
+	            else {
+	                if (~shift) {
+	                    group.shiftIndices(shift);
+	                }
+	                groups.push(group);
+	            }
+	        }
+	        this.groups = groups;
 	    }
 	    get karaokeGroups() {
 	        return [...this.groups];
@@ -475,7 +495,7 @@
 	    props: {
 	        karaokeGroup: { type: null, required: true }
 	    },
-	    emits: ["move-word-to-prec", "move-word-to-next"],
+	    emits: ["move-word-to-prec", "move-word-to-next", "delete"],
 	    setup(__props) {
 	        const props = __props;
 	        const timecodeStart = new Timecode(props.karaokeGroup.startTimeMs);
@@ -486,6 +506,16 @@
 	        const millisChanged = timecodeStart.millis !== timecodeEnd.millis;
 	        return (_ctx, _cache) => {
 	            return (vue.openBlock(), vue.createElementBlock("tr", null, [
+	                vue.createElementVNode("td", null, [
+	                    vue.createElementVNode("button", {
+	                        class: "button is-small is-danger",
+	                        onClick: _cache[0] || (_cache[0] = ($event) => { _ctx.$emit('delete', _ctx.karaokeGroup.id); })
+	                    }, _cache[3] || (_cache[3] = [
+	                        vue.createElementVNode("span", { class: "icon is-small" }, [
+	                            vue.createElementVNode("i", { class: "fas fa-times" })
+	                        ], -1 /* HOISTED */)
+	                    ]))
+	                ]),
 	                vue.createElementVNode("td", null, [
 	                    vue.createVNode(script$5, vue.normalizeProps(vue.guardReactiveProps({ karaokeGroup: _ctx.karaokeGroup })), null, 16 /* FULL_PROPS */)
 	                ]),
@@ -510,8 +540,8 @@
 	                vue.createElementVNode("td", null, [
 	                    vue.createVNode(script$3, {
 	                        "karaoke-group": props.karaokeGroup,
-	                        onMoveWordToPrec: _cache[0] || (_cache[0] = ($event) => (_ctx.$emit('move-word-to-prec', $event))),
-	                        onMoveWordToNext: _cache[1] || (_cache[1] = ($event) => (_ctx.$emit('move-word-to-next', $event)))
+	                        onMoveWordToPrec: _cache[1] || (_cache[1] = ($event) => (_ctx.$emit('move-word-to-prec', $event))),
+	                        onMoveWordToNext: _cache[2] || (_cache[2] = ($event) => (_ctx.$emit('move-word-to-next', $event)))
 	                    }, null, 8 /* PROPS */, ["karaoke-group"])
 	                ])
 	            ]));
@@ -542,10 +572,15 @@
 	            captionService.moveLastWordToNextGroup(groupId);
 	            groups.value = captionService.karaokeGroups;
 	        }
+	        function deleteKaraokeGroup(karaokeGroupId) {
+	            captionService.deleteKaraokeGroup(karaokeGroupId);
+	            groups.value = captionService.karaokeGroups;
+	        }
 	        return (_ctx, _cache) => {
 	            return (vue.openBlock(), vue.createElementBlock("table", _hoisted_1$1, [
 	                _cache[0] || (_cache[0] = vue.createElementVNode("thead", null, [
 	                    vue.createElementVNode("tr", { class: "is-link" }, [
+	                        vue.createElementVNode("th", { style: { "width": "3%" } }),
 	                        vue.createElementVNode("th", {
 	                            class: "has-text-white",
 	                            style: { "width": "5%" }
@@ -567,8 +602,9 @@
 	                            key: karaokeGroup.id,
 	                            "karaoke-group": karaokeGroup,
 	                            onMoveWordToPrec: ($event) => (moveFirstWordToPrecedentGroup(index)),
-	                            onMoveWordToNext: ($event) => (moveLastWordToNextGroup(index))
-	                        }, null, 8 /* PROPS */, ["karaoke-group", "onMoveWordToPrec", "onMoveWordToNext"]));
+	                            onMoveWordToNext: ($event) => (moveLastWordToNextGroup(index)),
+	                            onDelete: ($event) => (deleteKaraokeGroup(karaokeGroup.id))
+	                        }, null, 8 /* PROPS */, ["karaoke-group", "onMoveWordToPrec", "onMoveWordToNext", "onDelete"]));
 	                    }), 128 /* KEYED_FRAGMENT */))
 	                ])
 	            ]));

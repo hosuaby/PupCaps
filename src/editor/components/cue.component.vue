@@ -10,6 +10,7 @@ const props = defineProps<{ karaokeGroup: KaraokeGroup }>();
 defineEmits<{
   (event: 'move-word-to-prec', value: KaraokeWord): void;
   (event: 'move-word-to-next', value: KaraokeWord): void;
+  (event: 'delete', value: string): void;
 }>();
 
 const timecodeStart = new Timecode(props.karaokeGroup.startTimeMs);
@@ -23,6 +24,14 @@ const millisChanged = timecodeStart.millis !== timecodeEnd.millis;
 
 <template>
   <tr>
+    <td>
+      <button class="button is-small is-danger"
+              @click="$emit('delete', karaokeGroup.id);">
+        <span class="icon is-small">
+          <i class="fas fa-times"></i>
+        </span>
+      </button>
+    </td>
     <td>
       <indexes v-bind="{ karaokeGroup: karaokeGroup }"></indexes>
     </td>

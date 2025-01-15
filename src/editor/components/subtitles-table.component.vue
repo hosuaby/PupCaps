@@ -23,12 +23,18 @@ function moveLastWordToNextGroup(groupId: number) {
   captionService.moveLastWordToNextGroup(groupId);
   groups.value = captionService.karaokeGroups;
 }
+
+function deleteKaraokeGroup(karaokeGroupId: string) {
+  captionService.deleteKaraokeGroup(karaokeGroupId);
+  groups.value = captionService.karaokeGroups;
+}
 </script>
 
 <template>
   <table class="table is-fullwidth is-hoverable">
     <thead>
       <tr class="is-link">
+        <th style="width: 3%"></th>
         <th class="has-text-white" style="width: 5%">Indexes</th>
         <th class="has-text-white" style="width: 15%">Start</th>
         <th class="has-text-white" style="width: 15%">End</th>
@@ -41,7 +47,8 @@ function moveLastWordToNextGroup(groupId: number) {
            :key="karaokeGroup.id"
            :karaoke-group="karaokeGroup"
            @move-word-to-prec="moveFirstWordToPrecedentGroup(index)"
-           @move-word-to-next="moveLastWordToNextGroup(index)"></cue>
+           @move-word-to-next="moveLastWordToNextGroup(index)"
+           @delete="deleteKaraokeGroup(karaokeGroup.id)"></cue>
     </tbody>
   </table>
 </template>

@@ -50,6 +50,11 @@ export class KaraokeGroup {
         return this.words.pop()!;
     }
 
+    public shiftIndices(shift: number) {
+        this.indexStart += shift;
+        this.indexEnd += shift;
+    }
+
     public get id() {
         return `${this.indexStart}-${this.indexEnd}`;
     }
@@ -127,6 +132,24 @@ export class CaptionsService {
         if (karaokeGroup.isEmpty) {
             this.groups.splice(groupId, 1);
         }
+    }
+
+    public deleteKaraokeGroup(karaokeGroupId: string) {
+        const groups: KaraokeGroup[] = [];
+        let shift = 0;
+
+        for (const group of this.groups) {
+            if (group.id === karaokeGroupId) {
+                shift = group.indexStart - group.indexEnd - 1;
+            } else {
+                if (~shift) {
+                    group.shiftIndices(shift);
+                }
+                groups.push(group);
+            }
+        }
+
+        this.groups = groups;
     }
 
     public get karaokeGroups(): KaraokeGroup[] {
