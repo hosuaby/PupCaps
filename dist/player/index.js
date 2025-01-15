@@ -285,7 +285,7 @@
         }
     });
 
-    script.__file = "src/web/components/player.component.vue";
+    script.__file = "src/player/components/player.component.vue";
 
     function normalizeTimecode(timecode) {
         const [hh, mm, ss, ms] = timecode.split(/[^\d]+/);

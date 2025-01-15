@@ -6,9 +6,9 @@ import vue from 'rollup-plugin-vue';
 import copy from 'rollup-plugin-copy';
 
 export default [{
-    input: 'src/web/index.ts',
+    input: 'src/player/index.ts',
     output: {
-        file: 'dist/web/index.js',
+        file: 'dist/player/index.js',
         format: 'iife',
         sourcemap: true,
         globals: {
@@ -17,7 +17,7 @@ export default [{
     },
     plugins: [
         typescript({
-            tsconfig: './src/web/tsconfig.json',
+            tsconfig: './src/player/tsconfig.json',
         }),
         vue(),
         resolve({

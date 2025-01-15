@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {CssProcessor} from '../../src/web/css-processor';
+import {CssProcessor} from '../../src/player/css-processor';
 
 describe('CssProcessor', () => {
     it('parseFilter', () => {

@@ -185,7 +185,7 @@ var packageJson = {
 const assetsFolder = path__namespace.join(__dirname, '..', '..', 'assets');
 const defaultStylesCss = path__namespace.join(assetsFolder, 'captions.css');
 const indexHtml = path__namespace.join(assetsFolder, 'index.html');
-const indexJs = path__namespace.join(__dirname, '..', 'web', 'index.js');
+const indexJs = path__namespace.join(__dirname, '..', 'player', 'index.js');
 const nodeModules = path__namespace.join(__dirname, '..', '..', 'node_modules');
 
 function parseIntAndAssert(...assertions) {

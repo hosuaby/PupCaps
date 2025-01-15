@@ -1,4 +1,4 @@
-import {AbstractDynamicCssRule, createDynamicCssRule, Filter, FilterType} from '../script/dynamic-css-rules';
+import {AbstractDynamicCssRule, createDynamicCssRule, Filter, FilterType} from '../common/dynamic-css-rules';
 
 const dynamicCssClassPrefix = 'pup-';
 const dynamicCssClassPattern = /^\.pup-(\w+)((?:-[^-]+)+)$/;

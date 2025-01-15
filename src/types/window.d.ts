@@ -1,5 +1,5 @@
 import {Caption} from '../common/captions';
-import {Player} from '../web/player';
+import {Player} from '../player/player';
 import {PlayerArgs} from '../common/player-args';
 
 declare global {
