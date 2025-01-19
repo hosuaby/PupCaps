@@ -1,6 +1,6 @@
 import {expect} from 'chai';
 import browserEnv from 'browser-env';
-import {IndexesDynamicCssRule, normalizeTimecode, TimecodesDynamicCssRule} from '../../src/script/dynamic-css-rules';
+import {IndexesDynamicCssRule, normalizeTimecode, TimecodesDynamicCssRule} from '../../src/common/dynamic-css-rules';
 
 browserEnv();
 
