@@ -3,11 +3,12 @@ import {PNG} from 'pngjs';
 import {Args} from './cli';
 import {StatsPrinter} from './stats-printer';
 import {AbstractRenderer} from './abstract-renderer';
+import {FPSTicker} from './fps-ticker';
 
 export class RealTimeRenderer extends AbstractRenderer {
     private inputStream: PassThrough | null = null;
-    private intervalId: NodeJS.Timeout | null = null;
     private lastFrame: Buffer;
+    private readonly ticker: FPSTicker;
 
     constructor(args: Args) {
         super(args);
@@ -17,6 +18,7 @@ export class RealTimeRenderer extends AbstractRenderer {
             colorType: 6,
         });
         this.lastFrame = PNG.sync.write(empty);
+        this.ticker = new FPSTicker(args.fps);
     }
 
     public startEncoding() {
@@ -30,6 +32,9 @@ export class RealTimeRenderer extends AbstractRenderer {
                 '-pix_fmt yuva444p10le',                                // Lossless setting
                 `-s ${this.args.videoWidth}x${this.args.videoHeight}`,  // Frame size
                 `-r ${this.args.fps}`,                                  // Framerate
+            ])
+            .outputOptions([
+                `-vf fps=fps=${this.args.fps}`,     // Framerate
             ])
             .on('start', () => {
                 console.log('FFmpeg process started.');
@@ -47,10 +52,9 @@ export class RealTimeRenderer extends AbstractRenderer {
         command.run();
 
         // Produce frames in required rate
-        const intervalDuration = Math.round(1000 / 30);
-        this.intervalId = setInterval(() => {
+        this.ticker.start(() => {
             this.inputStream!.write(this.lastFrame);
-        }, intervalDuration);
+        });
     }
 
     public addFrame(frame: Buffer) {
@@ -58,7 +62,7 @@ export class RealTimeRenderer extends AbstractRenderer {
     }
 
     public endEncoding() {
-        clearTimeout(this.intervalId!);
+        this.ticker.stop();
         this.inputStream!.end();
     }
 }

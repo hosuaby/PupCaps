@@ -45,9 +45,6 @@ export class StepRecorder extends AbstractRecorder {
                 this.progressBar.increment();
             }
 
-            // Finish with en empty frame
-            this.renderer.addEmptyFrame();
-
             this.progressBar.stop();
             await this.renderer.endEncoding();
         } catch (error) {

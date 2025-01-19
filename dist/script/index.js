@@ -421,6 +421,9 @@ class StepRenderer extends AbstractRenderer {
                 '-f concat', // concat frames from the frame list
                 '-safe 0' // to prevent errors related to unsafe filenames
             ])
+                .outputOptions([
+                `-vf fps=fps=${this.args.fps}`, // Framerate
+            ])
                 .on('progress', (progress) => {
                 statsPrinter.print(progress);
             })
@@ -509,10 +512,37 @@ class RealTimeRecorder extends AbstractRecorder {
     }
 }
 
+class FPSTicker {
+    interval;
+    lastTime = 0;
+    onTick = () => { };
+    timeoutId = null;
+    constructor(fps) {
+        this.interval = 1000 / fps;
+    }
+    start(onTick = () => { }) {
+        this.onTick = onTick;
+        this.lastTime = Date.now();
+        this.tick();
+    }
+    stop() {
+        clearTimeout(this.timeoutId);
+    }
+    tick() {
+        const now = Date.now();
+        const deltaTime = now - this.lastTime;
+        if (deltaTime >= this.interval) {
+            this.lastTime = now - (deltaTime % this.interval); // Adjust for drift
+            this.onTick(deltaTime);
+        }
+        this.timeoutId = setTimeout(() => this.tick(), this.interval - (Date.now() - this.lastTime));
+    }
+}
+
 class RealTimeRenderer extends AbstractRenderer {
     inputStream = null;
-    intervalId = null;
     lastFrame;
+    ticker;
     constructor(args) {
         super(args);
         const empty = new pngjs.PNG({
@@ -521,6 +551,7 @@ class RealTimeRenderer extends AbstractRenderer {
             colorType: 6,
         });
         this.lastFrame = pngjs.PNG.sync.write(empty);
+        this.ticker = new FPSTicker(args.fps);
     }
     startEncoding() {
         this.inputStream = new stream.PassThrough();
@@ -532,6 +563,9 @@ class RealTimeRenderer extends AbstractRenderer {
             '-pix_fmt yuva444p10le', // Lossless setting
             `-s ${this.args.videoWidth}x${this.args.videoHeight}`, // Frame size
             `-r ${this.args.fps}`, // Framerate
+        ])
+            .outputOptions([
+            `-vf fps=fps=${this.args.fps}`, // Framerate
         ])
             .on('start', () => {
             console.log('FFmpeg process started.');
@@ -547,16 +581,15 @@ class RealTimeRenderer extends AbstractRenderer {
         });
         command.run();
         // Produce frames in required rate
-        const intervalDuration = Math.round(1000 / 30);
-        this.intervalId = setInterval(() => {
+        this.ticker.start(() => {
             this.inputStream.write(this.lastFrame);
-        }, intervalDuration);
+        });
     }
     addFrame(frame) {
         this.lastFrame = frame;
     }
     endEncoding() {
-        clearTimeout(this.intervalId);
+        this.ticker.stop();
         this.inputStream.end();
     }
 }
@@ -593,8 +626,6 @@ class StepRecorder extends AbstractRecorder {
                 }
                 this.progressBar.increment();
             }
-            // Finish with en empty frame
-            this.renderer.addEmptyFrame();
             this.progressBar.stop();
             await this.renderer.endEncoding();
         }

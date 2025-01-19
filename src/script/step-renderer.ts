@@ -61,6 +61,9 @@ export class StepRenderer extends AbstractRenderer {
                     '-f concat',    // concat frames from the frame list
                     '-safe 0'       // to prevent errors related to unsafe filenames
                 ])
+                .outputOptions([
+                    `-vf fps=fps=${this.args.fps}`,  // Framerate
+                ])
                 .on('progress', (progress: Object) => {
                     statsPrinter.print(progress);
                 })
