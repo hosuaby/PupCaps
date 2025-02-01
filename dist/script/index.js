@@ -96,7 +96,7 @@ const {
 } = extraTypingsCommander;
 
 var name = "pupcaps";
-var version = "1.0.0-alpha";
+var version = "1.0.0-alpha2";
 var description = "PupCaps! : A script to add stylish captions to your videos.";
 var author = "Alexei KLENIN <alexei.klenin@gmail.com> (https://github.com/hosuaby)";
 var license = "Apache-2.0";
