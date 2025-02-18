@@ -594,62 +594,6 @@ class RealTimeRenderer extends AbstractRenderer {
     }
 }
 
-class StepRecorder extends AbstractRecorder {
-    captions;
-    renderer;
-    progressBar;
-    constructor(args, captions, renderer, progressBar) {
-        super(args);
-        this.captions = captions;
-        this.renderer = renderer;
-        this.progressBar = progressBar;
-    }
-    async recordCaptionsVideo(indexHtml) {
-        this.progressBar.start(this.captions.length, 0);
-        try {
-            const videoElem = await this.launchBrowser(indexHtml);
-            this.renderer.startEncoding();
-            // Add empty frame before captions starts
-            const beginningTime = this.captions[0].startTimeMs;
-            this.renderer.addEmptyFrame(beginningTime);
-            for (let i = 0; i < this.captions.length; i++) {
-                const caption = this.captions[i];
-                await this.nextStep();
-                const screenShot = await this.takeScreenShot(videoElem);
-                this.renderer.addFrame(caption, screenShot);
-                // Add delay before the next frame
-                if (i < this.captions.length - 1) {
-                    const idleDelay = this.captions[i + 1].startTimeMs - caption.endTimeMs;
-                    if (idleDelay) {
-                        this.renderer.addEmptyFrame(idleDelay);
-                    }
-                }
-                this.progressBar.increment();
-            }
-            this.progressBar.stop();
-            await this.renderer.endEncoding();
-        }
-        catch (error) {
-            console.error('Error during Puppeteer operation:', error);
-        }
-        finally {
-            await this.browser?.close();
-        }
-    }
-    async nextStep() {
-        await this.page.evaluate(() => {
-            window.Player.next();
-        });
-    }
-    async takeScreenShot(elem) {
-        const screenshotBuffer = await elem.screenshot({
-            encoding: 'binary',
-            omitBackground: true,
-        });
-        return pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
-    }
-}
-
 function toMillis(timecodes) {
     const parts = timecodes.split(/[:,]/).map(Number);
     const hours = parts[0];
@@ -665,6 +609,39 @@ function toMillis(timecodes) {
 const indexLinePattern = /^\d+$/;
 const timecodesLinePattern = /^(\d{2}:\d{2}:\d{2},\d{3}) --> (\d{2}:\d{2}:\d{2},\d{3})$/;
 const highlightedWordPattern = /^\[(.+)](?:\((\w+)\))?$/;
+/**
+ * Groups captions with same words into groups.
+ * @param captions captions
+ * @returns groups of captions with same words
+ */
+function captionGroups(captions) {
+    const groups = [];
+    let lastCaption = null;
+    let lastGroup = [];
+    for (const caption of captions) {
+        if (lastCaption && !haveSameWords(caption, lastCaption)) {
+            groups.push(lastGroup);
+            lastGroup = [];
+        }
+        lastGroup.push(caption);
+        lastCaption = caption;
+    }
+    if (lastGroup.length) {
+        groups.push(lastGroup);
+    }
+    return groups;
+}
+function haveSameWords(caption1, caption2) {
+    if (caption1.words.length != caption2.words.length) {
+        return false;
+    }
+    for (let i = 0; i < caption1.words.length; i++) {
+        if (caption1.words[i].rawWord != caption2.words[i].rawWord) {
+            return false;
+        }
+    }
+    return true;
+}
 function readCaptions(srtContent) {
     const lines = srtContent.split('\n');
     const captions = [];
@@ -766,6 +743,82 @@ function splitText(text) {
         words.push(currentWord);
     }
     return words;
+}
+
+class StepRecorder extends AbstractRecorder {
+    captions;
+    renderer;
+    progressBar;
+    constructor(args, captions, renderer, progressBar) {
+        super(args);
+        this.captions = captions;
+        this.renderer = renderer;
+        this.progressBar = progressBar;
+    }
+    async recordCaptionsVideo(indexHtml) {
+        const groups = captionGroups(this.captions);
+        this.progressBar.start(this.captions.length, 0);
+        try {
+            const videoElem = await this.launchBrowser(indexHtml);
+            this.renderer.startEncoding();
+            // Add empty frame before captions starts
+            const beginningTime = this.captions[0].startTimeMs;
+            this.renderer.addEmptyFrame(beginningTime);
+            for (let i = 0; i < groups.length; i++) {
+                const captionGroup = StepRecorder.adjustCaptionsDuration(groups[i]);
+                for (const caption of captionGroup) {
+                    await this.nextStep();
+                    const screenShot = await this.takeScreenShot(videoElem);
+                    this.renderer.addFrame(caption, screenShot);
+                    this.progressBar.increment();
+                }
+                // Add delay before the next caption group
+                if (i < groups.length - 1) {
+                    const nextCaptionGroup = groups[i + 1];
+                    const lastCaption = captionGroup[captionGroup.length - 1];
+                    const nextCaption = nextCaptionGroup[0];
+                    const idleDelay = nextCaption.startTimeMs - lastCaption.endTimeMs;
+                    if (idleDelay) {
+                        this.renderer.addEmptyFrame(idleDelay);
+                    }
+                }
+            }
+            this.progressBar.stop();
+            await this.renderer.endEncoding();
+        }
+        catch (error) {
+            console.error('Error during Puppeteer operation:', error);
+        }
+        finally {
+            await this.browser?.close();
+        }
+    }
+    async nextStep() {
+        await this.page.evaluate(() => {
+            window.Player.next();
+        });
+    }
+    async takeScreenShot(elem) {
+        const screenshotBuffer = await elem.screenshot({
+            encoding: 'binary',
+            omitBackground: true,
+        });
+        return pngjs.PNG.sync.read(Buffer.from(screenshotBuffer));
+    }
+    static adjustCaptionsDuration(captionGroup) {
+        if (captionGroup.length < 2) {
+            return captionGroup;
+        }
+        const adjustedGroup = [];
+        for (let i = 0; i < captionGroup.length - 1; i++) {
+            const caption = Object.assign({}, captionGroup[i]);
+            const nextCaption = captionGroup[i + 1];
+            caption.endTimeMs = nextCaption.startTimeMs;
+            adjustedGroup.push(caption);
+        }
+        adjustedGroup.push(captionGroup[captionGroup.length - 1]);
+        return adjustedGroup;
+    }
 }
 
 class WebServer {

@@ -19,6 +19,33 @@ export interface Caption {
     words: Word[];
 }
 
+/**
+ * Groups captions with same words into groups.
+ * @param captions captions
+ * @returns groups of captions with same words
+ */
+export function captionGroups(captions: Caption[]): Caption[][] {
+    const groups: Caption[][] = [];
+    let lastCaption: Caption | null = null;
+    let lastGroup: Caption[] = [];
+
+    for (const caption of captions) {
+        if (lastCaption && !haveSameWords(caption, lastCaption!)) {
+            groups.push(lastGroup);
+            lastGroup = [];
+        }
+
+        lastGroup.push(caption);
+        lastCaption = caption;
+    }
+
+    if (lastGroup.length) {
+        groups.push(lastGroup);
+    }
+
+    return groups;
+}
+
 export function haveSameWords(caption1: Caption, caption2: Caption): boolean {
     if (caption1.words.length != caption2.words.length) {
         return false;

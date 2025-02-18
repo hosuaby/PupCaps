@@ -1,0 +1,1440 @@
+1
+00:00:00,719 --> 00:00:01,220
+[Hello.] 
+
+2
+00:00:01,920 --> 00:00:02,080
+[Let] us talk about 
+
+3
+00:00:02,080 --> 00:00:02,240
+Let [us] talk about 
+
+4
+00:00:02,240 --> 00:00:02,560
+Let us [talk] about 
+
+5
+00:00:02,560 --> 00:00:03,040
+Let us talk [about] 
+
+6
+00:00:03,040 --> 00:00:03,439
+[why] IT projects fail. 
+
+7
+00:00:03,439 --> 00:00:03,919
+why [IT] projects fail. 
+
+8
+00:00:03,919 --> 00:00:04,420
+why IT [projects] fail. 
+
+9
+00:00:04,560 --> 00:00:05,060
+why IT projects [fail.] 
+
+10
+00:00:05,520 --> 00:00:05,759
+[My] name is Alexei KLENIN. 
+
+11
+00:00:05,759 --> 00:00:06,000
+My [name] is Alexei KLENIN. 
+
+12
+00:00:06,000 --> 00:00:06,240
+My name [is] Alexei KLENIN. 
+
+13
+00:00:06,240 --> 00:00:06,659
+My name is [Alexei] KLENIN. 
+
+14
+00:00:06,659 --> 00:00:07,079
+My name is Alexei [KLENIN.] 
+
+15
+00:00:07,079 --> 00:00:07,499
+[I] am a senior software developer 
+
+16
+00:00:07,499 --> 00:00:07,919
+I [am] a senior software developer 
+
+17
+00:00:07,919 --> 00:00:08,160
+I am [a] senior software developer 
+
+18
+00:00:08,160 --> 00:00:08,559
+I am a [senior] software developer 
+
+19
+00:00:08,559 --> 00:00:09,059
+I am a senior [software] developer 
+
+20
+00:00:09,120 --> 00:00:09,620
+I am a senior software [developer] 
+
+21
+00:00:09,920 --> 00:00:10,420
+[specializing] in Java and Node.js stacks, 
+
+22
+00:00:10,559 --> 00:00:10,800
+specializing [in] Java and Node.js stacks, 
+
+23
+00:00:10,800 --> 00:00:11,200
+specializing in [Java] and Node.js stacks, 
+
+24
+00:00:11,200 --> 00:00:11,440
+specializing in Java [and] Node.js stacks, 
+
+25
+00:00:11,440 --> 00:00:11,930
+specializing in Java and [Node.js] stacks, 
+
+26
+00:00:11,930 --> 00:00:12,420
+specializing in Java and Node.js [stacks,] 
+
+27
+00:00:12,715 --> 00:00:12,875
+[and] I have had 
+
+28
+00:00:12,875 --> 00:00:13,035
+and [I] have had 
+
+29
+00:00:13,035 --> 00:00:13,275
+and I [have] had 
+
+30
+00:00:13,275 --> 00:00:13,515
+and I have [had] 
+
+31
+00:00:13,515 --> 00:00:13,755
+[the] 
+
+32
+00:00:13,515 --> 00:00:13,755
+[the] privilege of founding 
+
+33
+00:00:13,755 --> 00:00:14,255
+the [privilege] of founding 
+
+34
+00:00:14,315 --> 00:00:14,475
+the privilege [of] founding 
+
+35
+00:00:14,475 --> 00:00:14,975
+the privilege of [founding] 
+
+36
+00:00:15,115 --> 00:00:15,435
+[five] SaaS projects 
+
+37
+00:00:15,435 --> 00:00:15,755
+five [SaaS] projects 
+
+38
+00:00:15,755 --> 00:00:16,255
+five SaaS [projects] 
+
+39
+00:00:16,315 --> 00:00:16,475
+[that] are currently online. 
+
+40
+00:00:16,475 --> 00:00:16,635
+that [are] currently online. 
+
+41
+00:00:16,635 --> 00:00:17,115
+that are [currently] online. 
+
+42
+00:00:17,115 --> 00:00:17,615
+that are currently [online.] 
+
+43
+00:00:18,155 --> 00:00:18,315
+[Did] you know that the 
+
+44
+00:00:18,315 --> 00:00:18,395
+Did [you] know that the 
+
+45
+00:00:18,395 --> 00:00:18,635
+Did you [know] that the 
+
+46
+00:00:18,635 --> 00:00:18,875
+Did you know [that] the 
+
+47
+00:00:18,875 --> 00:00:19,035
+Did you know that [the] 
+
+48
+00:00:19,035 --> 00:00:19,435
+[cost] of IT project failures 
+
+49
+00:00:19,435 --> 00:00:19,755
+cost [of] IT project failures 
+
+50
+00:00:19,755 --> 00:00:20,075
+cost of [IT] project failures 
+
+51
+00:00:20,075 --> 00:00:20,475
+cost of IT [project] failures 
+
+52
+00:00:20,475 --> 00:00:20,975
+cost of IT project [failures] 
+
+53
+00:00:21,035 --> 00:00:21,275
+[in] the US 
+
+54
+00:00:21,275 --> 00:00:21,435
+in [the] US 
+
+55
+00:00:21,435 --> 00:00:21,935
+in the [US] 
+
+56
+00:00:22,235 --> 00:00:22,475
+[is] estimated to be 
+
+57
+00:00:22,475 --> 00:00:22,975
+is [estimated] to be 
+
+58
+00:00:23,275 --> 00:00:23,435
+is estimated [to] be 
+
+59
+00:00:23,435 --> 00:00:23,935
+is estimated to [be] 
+
+60
+00:00:23,994 --> 00:00:24,244
+[$2] billion annually? 
+
+61
+00:00:24,244 --> 00:00:24,494
+$2 [billion] annually? 
+
+62
+00:00:25,515 --> 00:00:26,015
+$2 billion [annually?] 
+
+63
+00:00:26,730 --> 00:00:27,230
+[According] to Zipdo’s 2023 report, 
+
+64
+00:00:27,369 --> 00:00:27,529
+According [to] Zipdo’s 2023 report, 
+
+65
+00:00:27,529 --> 00:00:28,029
+According to [Zipdo’s] 2023 report, 
+
+66
+00:00:28,970 --> 00:00:29,470
+According to Zipdo’s [2023] report, 
+
+67
+00:00:30,410 --> 00:00:30,910
+According to Zipdo’s 2023 [report,] 
+
+68
+00:00:31,610 --> 00:00:32,110
+[31.1%] of all IT projects 
+
+69
+00:00:33,450 --> 00:00:33,610
+31.1% [of] all IT projects 
+
+70
+00:00:33,610 --> 00:00:33,930
+31.1% of [all] IT projects 
+
+71
+00:00:33,930 --> 00:00:34,170
+31.1% of all [IT] projects 
+
+72
+00:00:34,170 --> 00:00:34,670
+31.1% of all IT [projects] 
+
+73
+00:00:34,809 --> 00:00:34,970
+[are] canceled before completion, 
+
+74
+00:00:34,970 --> 00:00:35,450
+are [canceled] before completion, 
+
+75
+00:00:35,450 --> 00:00:35,850
+are canceled [before] completion, 
+
+76
+00:00:35,850 --> 00:00:36,430
+are canceled before [completion,] 
+
+77
+00:00:37,129 --> 00:00:37,629
+[52%] of them 
+
+78
+00:00:37,930 --> 00:00:38,170
+52% [of] them 
+
+79
+00:00:38,170 --> 00:00:38,489
+52% of [them] 
+
+80
+00:00:38,489 --> 00:00:38,970
+[exceed] their initial budgets 
+
+81
+00:00:38,970 --> 00:00:39,129
+exceed [their] initial budgets 
+
+82
+00:00:39,129 --> 00:00:39,610
+exceed their [initial] budgets 
+
+83
+00:00:39,610 --> 00:00:40,110
+exceed their initial [budgets] 
+
+84
+00:00:40,170 --> 00:00:40,410
+[by] 189%, 
+
+85
+00:00:40,410 --> 00:00:42,795
+by [189%,] 
+
+86
+00:00:43,415 --> 00:00:43,655
+[and] only 16.2% of projects 
+
+87
+00:00:43,655 --> 00:00:44,055
+and [only] 16.2% of projects 
+
+88
+00:00:44,055 --> 00:00:44,555
+and only [16.2%] of projects 
+
+89
+00:00:45,255 --> 00:00:45,415
+and only 16.2% [of] projects 
+
+90
+00:00:45,415 --> 00:00:45,915
+and only 16.2% of [projects] 
+
+91
+00:00:45,975 --> 00:00:46,135
+[are] completed on time 
+
+92
+00:00:46,135 --> 00:00:46,615
+are [completed] on time 
+
+93
+00:00:46,615 --> 00:00:46,855
+are completed [on] time 
+
+94
+00:00:46,855 --> 00:00:47,015
+are completed on [time] 
+
+95
+00:00:47,015 --> 00:00:47,175
+[and] within budget. 
+
+96
+00:00:47,175 --> 00:00:47,575
+and [within] budget. 
+
+97
+00:00:47,575 --> 00:00:48,075
+and within [budget.] 
+
+98
+00:00:49,015 --> 00:00:49,515
+[Additionally,] 
+
+99
+00:00:50,215 --> 00:00:50,455
+[the] Standish group CHAOS report 
+
+100
+00:00:50,455 --> 00:00:50,855
+the [Standish] group CHAOS report 
+
+101
+00:00:50,855 --> 00:00:51,155
+the Standish [group] CHAOS report 
+
+102
+00:00:51,155 --> 00:00:51,455
+the Standish group [CHAOS] report 
+
+103
+00:00:51,455 --> 00:00:51,755
+the Standish group CHAOS [report] 
+
+104
+00:00:51,255 --> 00:00:51,755
+[report] 
+
+105
+00:00:52,775 --> 00:00:53,015
+[tells] us that poorly built software 
+
+106
+00:00:53,015 --> 00:00:53,415
+tells [us] that poorly built software 
+
+107
+00:00:53,415 --> 00:00:53,655
+tells us [that] poorly built software 
+
+108
+00:00:53,655 --> 00:00:54,055
+tells us that [poorly] built software 
+
+109
+00:00:54,055 --> 00:00:54,375
+tells us that poorly [built] software 
+
+110
+00:00:54,375 --> 00:00:54,875
+tells us that poorly built [software] 
+
+111
+00:00:55,360 --> 00:00:55,680
+[has] five to six times 
+
+112
+00:00:55,680 --> 00:00:56,000
+has [five] to six times 
+
+113
+00:00:56,000 --> 00:00:56,160
+has five [to] six times 
+
+114
+00:00:56,160 --> 00:00:56,400
+has five to [six] times 
+
+115
+00:00:56,400 --> 00:00:56,800
+has five to six [times] 
+
+116
+00:00:56,800 --> 00:00:57,040
+[higher] chances of failure 
+
+117
+00:00:57,040 --> 00:00:57,540
+higher [chances] of failure 
+
+118
+00:00:57,680 --> 00:00:57,920
+higher chances [of] failure 
+
+119
+00:00:57,920 --> 00:00:58,400
+higher chances of [failure] 
+
+120
+00:00:58,400 --> 00:00:58,720
+[due] to bad quality. 
+
+121
+00:00:58,720 --> 00:00:58,880
+due [to] bad quality. 
+
+122
+00:00:58,880 --> 00:00:59,120
+due to [bad] quality. 
+
+123
+00:00:59,120 --> 00:00:59,620
+due to bad [quality.] 
+
+124
+00:01:00,400 --> 00:01:00,640
+[The] consequences of such failures 
+
+125
+00:01:00,640 --> 00:01:01,140
+The [consequences] of such failures 
+
+126
+00:01:01,280 --> 00:01:01,520
+The consequences [of] such failures 
+
+127
+00:01:01,520 --> 00:01:01,840
+The consequences of [such] failures 
+
+128
+00:01:01,840 --> 00:01:02,240
+The consequences of such [failures] 
+
+129
+00:01:02,240 --> 00:01:02,400
+[can] be catastrophic. 
+
+130
+00:01:02,400 --> 00:01:02,640
+can [be] catastrophic. 
+
+131
+00:01:02,640 --> 00:01:03,140
+can be [catastrophic.] 
+
+132
+00:01:03,840 --> 00:01:04,340
+[Companies] suffer 
+
+133
+00:01:04,480 --> 00:01:04,879
+Companies [suffer] 
+
+134
+00:01:04,879 --> 00:01:05,379
+[financial] losses, 
+
+135
+00:01:05,520 --> 00:01:06,020
+financial [losses,] 
+
+136
+00:01:06,320 --> 00:01:06,480
+[a] tarnished reputation, 
+
+137
+00:01:06,480 --> 00:01:06,980
+a [tarnished] reputation, 
+
+138
+00:01:07,040 --> 00:01:07,540
+a tarnished [reputation,] 
+
+139
+00:01:08,400 --> 00:01:08,800
+[missed] market opportunities, 
+
+140
+00:01:08,800 --> 00:01:09,120
+missed [market] opportunities, 
+
+141
+00:01:09,120 --> 00:01:09,620
+missed market [opportunities,] 
+
+142
+00:01:10,495 --> 00:01:10,815
+[and] in 17% of cases, 
+
+143
+00:01:10,815 --> 00:01:11,295
+and [in] 17% of cases, 
+
+144
+00:01:11,295 --> 00:01:11,795
+and in [17%] of cases, 
+
+145
+00:01:11,935 --> 00:01:12,174
+and in 17% [of] cases, 
+
+146
+00:01:12,174 --> 00:01:12,655
+and in 17% of [cases,] 
+
+147
+00:01:12,655 --> 00:01:12,815
+[the] failure of an IT project 
+
+148
+00:01:12,815 --> 00:01:13,135
+the [failure] of an IT project 
+
+149
+00:01:13,135 --> 00:01:13,295
+the failure [of] an IT project 
+
+150
+00:01:13,295 --> 00:01:13,534
+the failure of [an] IT project 
+
+151
+00:01:13,534 --> 00:01:13,854
+the failure of an [IT] project 
+
+152
+00:01:13,854 --> 00:01:14,354
+the failure of an IT [project] 
+
+153
+00:01:14,815 --> 00:01:15,055
+[leads] to the collapse 
+
+154
+00:01:15,055 --> 00:01:15,215
+leads [to] the collapse 
+
+155
+00:01:15,215 --> 00:01:15,375
+leads to [the] collapse 
+
+156
+00:01:15,375 --> 00:01:15,775
+leads to the [collapse] 
+
+157
+00:01:15,775 --> 00:01:15,854
+[of] the company itself. 
+
+158
+00:01:15,854 --> 00:01:16,095
+of [the] company itself. 
+
+159
+00:01:16,095 --> 00:01:16,494
+of the [company] itself. 
+
+160
+00:01:16,494 --> 00:01:16,994
+of the company [itself.] 
+
+161
+00:01:17,854 --> 00:01:18,174
+[Among] the top reasons 
+
+162
+00:01:18,174 --> 00:01:18,335
+Among [the] top reasons 
+
+163
+00:01:18,335 --> 00:01:18,575
+Among the [top] reasons 
+
+164
+00:01:18,575 --> 00:01:19,075
+Among the top [reasons] 
+
+165
+00:01:19,455 --> 00:01:19,615
+[for] these failures 
+
+166
+00:01:19,615 --> 00:01:19,935
+for [these] failures 
+
+167
+00:01:19,935 --> 00:01:20,435
+for these [failures] 
+
+168
+00:01:20,735 --> 00:01:21,055
+[are] three critical mistakes, 
+
+169
+00:01:21,055 --> 00:01:21,295
+are [three] critical mistakes, 
+
+170
+00:01:21,295 --> 00:01:21,795
+are three [critical] mistakes, 
+
+171
+00:01:21,854 --> 00:01:22,354
+are three critical [mistakes,] 
+
+172
+00:01:23,140 --> 00:01:23,640
+[Unrealistic] expectations, 
+
+173
+00:01:24,100 --> 00:01:24,600
+Unrealistic [expectations,] 
+
+174
+00:01:25,299 --> 00:01:25,380
+[a] lack of proper technical documentation, 
+
+175
+00:01:25,380 --> 00:01:25,619
+a [lack] of proper technical documentation, 
+
+176
+00:01:25,619 --> 00:01:25,780
+a lack [of] proper technical documentation, 
+
+177
+00:01:25,780 --> 00:01:26,259
+a lack of [proper] technical documentation, 
+
+178
+00:01:26,259 --> 00:01:26,740
+a lack of proper [technical] documentation, 
+
+179
+00:01:26,740 --> 00:01:27,240
+a lack of proper technical [documentation,] 
+
+180
+00:01:27,860 --> 00:01:28,180
+[and] inadequate testing. 
+
+181
+00:01:28,180 --> 00:01:28,680
+and [inadequate] testing. 
+
+182
+00:01:28,899 --> 00:01:29,399
+and inadequate [testing.] 
+
+183
+00:01:30,259 --> 00:01:30,420
+[The] good news 
+
+184
+00:01:30,420 --> 00:01:30,659
+The [good] news 
+
+185
+00:01:30,659 --> 00:01:31,159
+The good [news] 
+
+186
+00:01:31,220 --> 00:01:31,380
+[is] that these mistakes 
+
+187
+00:01:31,380 --> 00:01:31,860
+is [that] these mistakes 
+
+188
+00:01:31,860 --> 00:01:32,100
+is that [these] mistakes 
+
+189
+00:01:32,100 --> 00:01:32,600
+is that these [mistakes] 
+
+190
+00:01:33,140 --> 00:01:33,380
+[are] entirely avoidable 
+
+191
+00:01:33,380 --> 00:01:33,880
+are [entirely] avoidable 
+
+192
+00:01:34,020 --> 00:01:34,520
+are entirely [avoidable] 
+
+193
+00:01:35,295 --> 00:01:35,535
+[if] you partner with someone 
+
+194
+00:01:35,535 --> 00:01:35,775
+if [you] partner with someone 
+
+195
+00:01:35,775 --> 00:01:36,255
+if you [partner] with someone 
+
+196
+00:01:36,255 --> 00:01:36,575
+if you partner [with] someone 
+
+197
+00:01:36,575 --> 00:01:37,075
+if you partner with [someone] 
+
+198
+00:01:37,295 --> 00:01:37,795
+[experienced] and competent. 
+
+199
+00:01:38,095 --> 00:01:38,335
+experienced [and] competent. 
+
+200
+00:01:38,335 --> 00:01:38,835
+experienced and [competent.] 
+
+201
+00:01:40,175 --> 00:01:40,415
+[As] the founder 
+
+202
+00:01:40,415 --> 00:01:40,575
+As [the] founder 
+
+203
+00:01:40,575 --> 00:01:41,075
+As the [founder] 
+
+204
+00:01:41,215 --> 00:01:41,455
+[of] an early stage project, 
+
+205
+00:01:41,455 --> 00:01:41,695
+of [an] early stage project, 
+
+206
+00:01:41,695 --> 00:01:42,015
+of an [early] stage project, 
+
+207
+00:01:42,015 --> 00:01:42,415
+of an early [stage] project, 
+
+208
+00:01:42,415 --> 00:01:42,915
+of an early stage [project,] 
+
+209
+00:01:43,215 --> 00:01:43,455
+[you] can not afford 
+
+210
+00:01:43,455 --> 00:01:43,705
+you [can] not afford 
+
+211
+00:01:43,705 --> 00:01:43,955
+you can [not] afford 
+
+212
+00:01:44,095 --> 00:01:44,575
+you can not [afford] 
+
+213
+00:01:44,575 --> 00:01:44,735
+[to] make poor decisions 
+
+214
+00:01:44,735 --> 00:01:45,135
+to [make] poor decisions 
+
+215
+00:01:45,135 --> 00:01:45,375
+to make [poor] decisions 
+
+216
+00:01:45,375 --> 00:01:45,875
+to make poor [decisions] 
+
+217
+00:01:46,015 --> 00:01:46,255
+[at] the start. 
+
+218
+00:01:46,255 --> 00:01:46,415
+at [the] start. 
+
+219
+00:01:46,415 --> 00:01:46,915
+at the [start.] 
+
+220
+00:01:47,630 --> 00:01:47,790
+[You] need to carefully 
+
+221
+00:01:47,790 --> 00:01:48,030
+You [need] to carefully 
+
+222
+00:01:48,030 --> 00:01:48,190
+You need [to] carefully 
+
+223
+00:01:48,190 --> 00:01:48,690
+You need to [carefully] 
+
+224
+00:01:48,750 --> 00:01:49,150
+[plan] the initial features 
+
+225
+00:01:49,150 --> 00:01:49,310
+plan [the] initial features 
+
+226
+00:01:49,310 --> 00:01:49,790
+plan the [initial] features 
+
+227
+00:01:49,790 --> 00:01:50,270
+plan the initial [features] 
+
+228
+00:01:50,270 --> 00:01:50,430
+[for] your MVP, 
+
+229
+00:01:50,430 --> 00:01:50,670
+for [your] MVP, 
+
+230
+00:01:50,670 --> 00:01:51,170
+for your [MVP,] 
+
+231
+00:01:51,470 --> 00:01:51,790
+[choose] the right technical stack, 
+
+232
+00:01:51,790 --> 00:01:51,870
+choose [the] right technical stack, 
+
+233
+00:01:51,870 --> 00:01:52,190
+choose the [right] technical stack, 
+
+234
+00:01:52,190 --> 00:01:52,690
+choose the right [technical] stack, 
+
+235
+00:01:52,830 --> 00:01:53,330
+choose the right technical [stack,] 
+
+236
+00:01:53,550 --> 00:01:53,790
+[and] find the most suitable 
+
+237
+00:01:53,950 --> 00:01:54,270
+and [find] the most suitable 
+
+238
+00:01:54,270 --> 00:01:54,430
+and find [the] most suitable 
+
+239
+00:01:54,430 --> 00:01:54,670
+and find the [most] suitable 
+
+240
+00:01:54,670 --> 00:01:55,170
+and find the most [suitable] 
+
+241
+00:01:55,310 --> 00:01:55,710
+[cloud] solution. 
+
+242
+00:01:55,710 --> 00:01:56,210
+cloud [solution.] 
+
+243
+00:01:56,590 --> 00:01:56,830
+[These] foundational decisions 
+
+244
+00:01:56,830 --> 00:01:57,330
+These [foundational] decisions 
+
+245
+00:01:57,710 --> 00:01:58,210
+These foundational [decisions] 
+
+246
+00:01:58,270 --> 00:01:58,430
+[are] crucial, 
+
+247
+00:01:58,430 --> 00:01:58,930
+are [crucial,] 
+
+248
+00:01:59,150 --> 00:01:59,470
+[and] for tasks like these, 
+
+249
+00:01:59,470 --> 00:01:59,630
+and [for] tasks like these, 
+
+250
+00:01:59,630 --> 00:02:00,030
+and for [tasks] like these, 
+
+251
+00:02:00,030 --> 00:02:00,190
+and for tasks [like] these, 
+
+252
+00:02:00,190 --> 00:02:00,690
+and for tasks like [these,] 
+
+253
+00:02:00,985 --> 00:02:01,305
+[having] the right support 
+
+254
+00:02:01,305 --> 00:02:01,545
+having [the] right support 
+
+255
+00:02:01,545 --> 00:02:01,865
+having the [right] support 
+
+256
+00:02:01,865 --> 00:02:02,365
+having the right [support] 
+
+257
+00:02:02,424 --> 00:02:02,664
+[can] make all the difference. 
+
+258
+00:02:02,664 --> 00:02:02,905
+can [make] all the difference. 
+
+259
+00:02:02,905 --> 00:02:03,145
+can make [all] the difference. 
+
+260
+00:02:03,145 --> 00:02:03,305
+can make all [the] difference. 
+
+261
+00:02:03,305 --> 00:02:03,805
+can make all the [difference.] 
+
+262
+00:02:04,744 --> 00:02:04,904
+[I] bring more than 10 
+
+263
+00:02:04,904 --> 00:02:05,064
+I [bring] more than 10 
+
+264
+00:02:05,064 --> 00:02:05,384
+I bring [more] than 10 
+
+265
+00:02:05,384 --> 00:02:05,625
+I bring more [than] 10 
+
+266
+00:02:05,625 --> 00:02:05,945
+I bring more than [10] 
+
+267
+00:02:05,945 --> 00:02:06,344
+[years] of experience 
+
+268
+00:02:06,344 --> 00:02:06,505
+years [of] experience 
+
+269
+00:02:06,505 --> 00:02:07,005
+years of [experience] 
+
+270
+00:02:07,225 --> 00:02:07,465
+[as] a senior software developer, 
+
+271
+00:02:07,465 --> 00:02:07,625
+as [a] senior software developer, 
+
+272
+00:02:07,625 --> 00:02:07,945
+as a [senior] software developer, 
+
+273
+00:02:07,945 --> 00:02:08,445
+as a senior [software] developer, 
+
+274
+00:02:08,584 --> 00:02:09,084
+as a senior software [developer,] 
+
+275
+00:02:09,544 --> 00:02:09,944
+[lead] developer, 
+
+276
+00:02:09,944 --> 00:02:10,444
+lead [developer,] 
+
+277
+00:02:10,824 --> 00:02:11,224
+[and] founder of five 
+
+278
+00:02:11,224 --> 00:02:11,625
+and [founder] of five 
+
+279
+00:02:11,625 --> 00:02:11,944
+and founder [of] five 
+
+280
+00:02:11,944 --> 00:02:12,265
+and founder of [five] 
+
+281
+00:02:12,265 --> 00:02:12,665
+[SaaS] projects 
+
+282
+00:02:12,665 --> 00:02:13,165
+SaaS [projects] 
+
+283
+00:02:13,580 --> 00:02:13,740
+[that] are currently online. 
+
+284
+00:02:13,740 --> 00:02:13,980
+that [are] currently online. 
+
+285
+00:02:13,980 --> 00:02:14,460
+that are [currently] online. 
+
+286
+00:02:14,460 --> 00:02:14,960
+that are currently [online.] 
+
+287
+00:02:15,500 --> 00:02:15,740
+[For] an early stage startup founder, 
+
+288
+00:02:15,740 --> 00:02:16,060
+For [an] early stage startup founder, 
+
+289
+00:02:16,060 --> 00:02:16,460
+For an [early] stage startup founder, 
+
+290
+00:02:16,460 --> 00:02:16,700
+For an early [stage] startup founder, 
+
+291
+00:02:16,700 --> 00:02:17,200
+For an early stage [startup] founder, 
+
+292
+00:02:17,260 --> 00:02:17,760
+For an early stage startup [founder,] 
+
+293
+00:02:18,300 --> 00:02:18,700
+[having] access 
+
+294
+00:02:18,700 --> 00:02:19,100
+having [access] 
+
+295
+00:02:19,100 --> 00:02:19,260
+[to] this level of experience 
+
+296
+00:02:19,260 --> 00:02:19,580
+to [this] level of experience 
+
+297
+00:02:19,580 --> 00:02:19,900
+to this [level] of experience 
+
+298
+00:02:19,900 --> 00:02:20,220
+to this level [of] experience 
+
+299
+00:02:20,220 --> 00:02:20,720
+to this level of [experience] 
+
+300
+00:02:20,860 --> 00:02:21,100
+[can] be extremely valuable. 
+
+301
+00:02:21,100 --> 00:02:21,420
+can [be] extremely valuable. 
+
+302
+00:02:21,420 --> 00:02:21,920
+can be [extremely] valuable. 
+
+303
+00:02:22,140 --> 00:02:22,640
+can be extremely [valuable.] 
+
+304
+00:02:23,340 --> 00:02:23,500
+[Do] not take unnecessary risks 
+
+305
+00:02:23,500 --> 00:02:23,660
+Do [not] take unnecessary risks 
+
+306
+00:02:23,660 --> 00:02:23,900
+Do not [take] unnecessary risks 
+
+307
+00:02:23,900 --> 00:02:24,400
+Do not take [unnecessary] risks 
+
+308
+00:02:24,700 --> 00:02:24,940
+Do not take unnecessary [risks] 
+
+309
+00:02:24,940 --> 00:02:25,180
+[with] your project. 
+
+310
+00:02:25,180 --> 00:02:25,420
+with [your] project. 
+
+311
+00:02:25,420 --> 00:02:25,920
+with your [project.] 
+
+312
+00:02:26,415 --> 00:02:26,655
+[Give] it the best 
+
+313
+00:02:26,655 --> 00:02:26,895
+Give [it] the best 
+
+314
+00:02:26,895 --> 00:02:27,135
+Give it [the] best 
+
+315
+00:02:27,135 --> 00:02:27,535
+Give it the [best] 
+
+316
+00:02:27,855 --> 00:02:28,355
+[possible] chance to succeed 
+
+317
+00:02:27,535 --> 00:02:27,855
+possible [chance] to succeed 
+
+318
+00:02:28,895 --> 00:02:29,135
+possible chance [to] succeed 
+
+319
+00:02:29,135 --> 00:02:29,635
+possible chance to [succeed] 
+
+320
+00:02:29,935 --> 00:02:30,255
+[by] partnering 
+
+321
+00:02:30,255 --> 00:02:30,755
+by [partnering] 
+
+322
+00:02:30,815 --> 00:02:31,055
+[with] a proven professional. 
+
+323
+00:02:31,055 --> 00:02:31,135
+with [a] proven professional. 
+
+324
+00:02:31,135 --> 00:02:31,535
+with a [proven] professional. 
+
+325
+00:02:31,535 --> 00:02:32,035
+with a proven [professional.] 
+
+326
+00:02:32,815 --> 00:02:33,215
+[If] success is your goal, 
+
+327
+00:02:33,215 --> 00:02:33,615
+If [success] is your goal, 
+
+328
+00:02:33,615 --> 00:02:33,695
+If success [is] your goal, 
+
+329
+00:02:33,695 --> 00:02:33,935
+If success is [your] goal, 
+
+330
+00:02:33,935 --> 00:02:34,435
+If success is your [goal,] 
+
+331
+00:02:34,735 --> 00:02:35,215
+[investing] in experienced 
+
+332
+00:02:35,215 --> 00:02:35,455
+investing [in] experienced 
+
+333
+00:02:35,455 --> 00:02:35,955
+investing in [experienced] 
+
+334
+00:02:36,335 --> 00:02:36,495
+[and] reliable expertise 
+
+335
+00:02:36,495 --> 00:02:36,995
+and [reliable] expertise 
+
+336
+00:02:37,215 --> 00:02:37,715
+and reliable [expertise] 
+
+337
+00:02:37,855 --> 00:02:38,015
+[is] essential. 
+
+338
+00:02:38,015 --> 00:02:38,515
+is [essential.] 
+
+339
+00:02:39,153 --> 00:02:39,473
+[Schedule] a meeting now 
+
+340
+00:02:39,473 --> 00:02:39,553
+Schedule [a] meeting now 
+
+341
+00:02:39,553 --> 00:02:40,033
+Schedule a [meeting] now 
+
+342
+00:02:40,033 --> 00:02:40,513
+Schedule a meeting [now] 
+
+343
+00:02:40,513 --> 00:02:40,673
+[to] discuss your project, 
+
+344
+00:02:40,673 --> 00:02:41,153
+to [discuss] your project, 
+
+345
+00:02:41,153 --> 00:02:41,393
+to discuss [your] project, 
+
+346
+00:02:41,393 --> 00:02:41,873
+to discuss your [project,] 
+
+347
+00:02:41,873 --> 00:02:42,033
+[and] let us work together 
+
+348
+00:02:42,033 --> 00:02:42,153
+and [let] us work together 
+
+349
+00:02:42,153 --> 00:02:42,273
+and let [us] work together 
+
+350
+00:02:42,273 --> 00:02:42,593
+and let us [work] together 
+
+351
+00:02:42,593 --> 00:02:43,093
+and let us work [together] 
+
+352
+00:02:43,473 --> 00:02:43,633
+[to] turn your ideas 
+
+353
+00:02:43,633 --> 00:02:44,033
+to [turn] your ideas 
+
+354
+00:02:44,033 --> 00:02:44,273
+to turn [your] ideas 
+
+355
+00:02:44,273 --> 00:02:44,773
+to turn your [ideas] 
+
+356
+00:02:45,153 --> 00:02:45,473
+[into] actionable 
+
+357
+00:02:45,473 --> 00:02:45,973
+into [actionable] 
+
+358
+00:02:46,033 --> 00:02:46,273
+[and] achievable steps. 
+
+359
+00:02:46,273 --> 00:02:46,773
+and [achievable] steps. 
+
+360
+00:02:47,073 --> 00:02:47,573
+and achievable [steps.] 
+

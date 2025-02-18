@@ -1,5 +1,8 @@
 import {expect} from 'chai';
-import {Caption, haveSameWords, readWords, splitText} from '../../src/common/captions';
+import {Caption, captionGroups, haveSameWords, readCaptions, readWords, splitText} from '../../src/common/captions';
+import {readFileSync} from 'fs';
+
+const exampleSrt = readFileSync('test/resources/example.srt', 'utf-8');
 
 it('haveSameWords', () => {
     // Given
@@ -207,4 +210,19 @@ describe('readCaptions', () => {
             }
         ]);
     });
+});
+
+it('captionGroups', () => {
+    // Given
+    const captions = readCaptions(exampleSrt);
+
+    // When
+    const groups = captionGroups(captions);
+
+    // Then
+    console.dir(groups[0], {depth:null});
+    console.dir(groups[1], {depth:null});
+
+    expect(groups[0]).to.have.lengthOf(1);
+    expect(groups[1]).to.have.lengthOf(4);
 });
