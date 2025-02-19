@@ -439,6 +439,7 @@ class StepRenderer extends AbstractRenderer {
     }
 }
 
+const MAX_INT_32 = (2 ** 31) - 1;
 class AbstractRecorder {
     args;
     browser = null;
@@ -453,6 +454,7 @@ class AbstractRecorder {
                 '--allow-file-access-from-files', // Allow file access
             ],
             headless: true,
+            protocolTimeout: MAX_INT_32,
         });
         this.page = await this.browser.newPage();
         await this.page.goto(`file://${indexHtml}`);
